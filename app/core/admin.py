@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from members.models import Member
+from projects.models import Project
 
 
 class UserAdmin(BaseUserAdmin):
@@ -23,3 +24,4 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(Member, UserAdmin)
+admin.site.register(Project)
