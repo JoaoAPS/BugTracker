@@ -3,11 +3,11 @@ from django.test import TestCase
 from projects.models import Project
 
 
-class ProjectModelPositiveTests(TestCase):
-    """Test the project model for successful operations"""
+class ProjectModelTests(TestCase):
+    """Test the project model"""
 
-    def test_project_setStatus(self):
-        """Test the setStatus project method"""
+    def test_project_set_status(self):
+        """Test the set_status project method"""
         proj = Project.objects.create(title='Test')
 
         proj.set_status('ON-GOING')
