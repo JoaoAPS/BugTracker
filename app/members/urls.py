@@ -7,4 +7,5 @@ app_name = 'members'
 
 urlpatterns = [
     path('', views.MemberListView.as_view(), name='list'),
+    path('register', views.MemberCreateView.as_view(), name='register'),
 ]
