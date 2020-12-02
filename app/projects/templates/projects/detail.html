@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Project Page</title>
+</head>
+
+<body>
+	<h1>{{ project.title }}</h1>
+	
+	<p>{{ project.description }}</p>
+	
+	<h3>Supervisors:</h3>
+	{% if project.supervisors.all %}
+		<ul>
+			{% for supervisor in project.supervisors.all %}
+				<li><a href="{% url 'members:profile' supervisor.id %}">{{ supervisor.name }}</a></li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>This project has no supervisors.</p>
+	{% endif %}
+	
+	
+	<h3>Members:</h3>
+	{% if project.members.all %}
+		<ul>
+			{% for member in project.members.all %}
+				<li><a href="{% url 'members:profile' member.id %}">{{ member.name }}</a></li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>This project has no members.</p>
+	{% endif %}
+	
+	<h3>Bugs:</h3>
+	{% if project.bugs.all %}
+		<ol>
+			{% for bug in project.bugs.all %}
+				<li><a href="#">bug.name</a></li>
+			{% endfor %}
+		</ol>
+	{% else %}
+		<p>No bugs in the project.</p>
+	{% endif %}
+</body>
+
+</html>

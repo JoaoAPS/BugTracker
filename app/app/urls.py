@@ -7,4 +7,5 @@ urlpatterns = [
     path('', indexView),
     path('admin/', admin.site.urls),
     path('members/', include('members.urls')),
+    path('projects/', include('projects.urls')),
 ]
