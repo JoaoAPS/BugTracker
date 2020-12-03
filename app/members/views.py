@@ -2,9 +2,21 @@ from django.urls import reverse_lazy
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
+from django.contrib.auth.views import LoginView, LogoutView
 
 from .models import Member
 from .forms import MemberCreateForm
+
+
+class MemberLoginView(LoginView):
+    """View for logging in users"""
+    template_name = 'registration/login.html'
+    next = '/'
+
+
+class MemberLogoutView(LogoutView):
+    """View for logging out users"""
+    next_page = '/'
 
 
 class MemberListView(ListView):
