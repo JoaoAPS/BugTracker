@@ -11,7 +11,6 @@ from .forms import MemberCreateForm
 class MemberLoginView(LoginView):
     """View for logging in users"""
     template_name = 'registration/login.html'
-    next = '/'
 
 
 class MemberLogoutView(LogoutView):
