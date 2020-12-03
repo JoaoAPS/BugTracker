@@ -37,3 +37,9 @@ class Bug(models.Model):
             )
 
         self._status = status
+
+    def __str__(self):
+        """Return the string representation of the bug object"""
+        return self.title
+
+    __repr__ = __str__
