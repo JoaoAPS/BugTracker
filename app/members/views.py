@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+from django.shortcuts import redirect
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
@@ -31,6 +32,15 @@ class MemberCreateView(CreateView):
     form_class = MemberCreateForm
     template_name = 'registration/register.html'
     success_url = reverse_lazy('members:list')
+
+    def form_valid(self, form):
+        """If the form is valid, add the creator and save the object"""
+        self.object = form.save(commit=False)
+        self.object.is_staff = self.object.is_superuser
+        self.object.save()
+        form.save_m2m()
+
+        return redirect(self.get_success_url())
 
 
 class MemberDetailView(DetailView):
