@@ -9,4 +9,3 @@ class BugCreationForm(forms.ModelForm):
     class Meta:
         model = Bug
         exclude = ['_status', 'creationDate', 'closingDate', 'creator']
-        widgets = {'creator': forms.HiddenInput}
