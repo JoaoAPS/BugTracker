@@ -8,7 +8,7 @@ app_name = 'members'
 urlpatterns = [
     path('', views.MemberListView.as_view(), name='list'),
     path(
-        '<int:member_id>',
+        '<int:pk>',
         views.MemberDetailView.as_view(),
         name='profile'
     ),

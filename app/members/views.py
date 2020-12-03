@@ -7,6 +7,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 
 from .models import Member
 from .forms import MemberCreateForm
+from members.mixins import IsSuperuserMixin, IsSuperuserOrCurrentUserMixin
 
 
 class MemberLoginView(LoginView):
@@ -19,14 +20,14 @@ class MemberLogoutView(LogoutView):
     next_page = '/'
 
 
-class MemberListView(ListView):
+class MemberListView(IsSuperuserMixin, ListView):
     """View for listing members"""
     model = Member
     template_name = 'members/list.html'
     context_object_name = 'members'
 
 
-class MemberCreateView(CreateView):
+class MemberCreateView(IsSuperuserMixin, CreateView):
     """View for creating member"""
     model = Member
     form_class = MemberCreateForm
@@ -37,15 +38,15 @@ class MemberCreateView(CreateView):
         """If the form is valid, add the creator and save the object"""
         self.object = form.save(commit=False)
         self.object.is_staff = self.object.is_superuser
+        self.object.set_password(form.cleaned_data['password'])
         self.object.save()
         form.save_m2m()
 
         return redirect(self.get_success_url())
 
 
-class MemberDetailView(DetailView):
+class MemberDetailView(IsSuperuserOrCurrentUserMixin, DetailView):
     """View for displaying member detail"""
     model = Member
     template_name = 'members/profile.html'
     context_object_name = 'member'
-    pk_url_kwarg = 'member_id'
