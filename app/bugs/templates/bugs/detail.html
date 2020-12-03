@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bug Page</title>
+</head>
+
+<body>
+	<h1>{{ bug.title }}</h1>
+	
+	<p><strong>Project:</strong> <a href="{% url 'projects:detail' bug.project.id %}">{{ bug.project.title }}</a></p>
+	
+	<p>{{ bug.description }}</p>
+	
+	Created in {{ bug.creationDate }} by <a href="{% url 'members:profile' bug.creator.id %}">{{ bug.creator.name }}</a>.
+	
+	<h3>Assign Members:</h3>
+	{% if bug.assigned_members.all %}
+		<ul>
+			{% for member in bug.assigned_members.all %}
+				<li><a href="{% url 'members:profile' member.id %}">{{ member.name }}</a></li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>No members assigned to this bug.</p>
+	{% endif %}
+
+</body>
+
+</html>

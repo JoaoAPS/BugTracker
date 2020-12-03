@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bugs</title>
+</head>
+
+<body>
+	<h1>Bugs:</h1>
+	{% if bugs %}
+		<ul>
+		{% for bug in bugs %}
+			<li><a href="{% url 'bugs:detail' bug.id %}">{{ bug.title }}</a></li>
+		{% endfor %}
+		</ul>
+	{% else %}
+		No bugs found
+	{% endif %}
+</body>
+
+</html>
