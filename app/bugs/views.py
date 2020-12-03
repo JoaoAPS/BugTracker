@@ -7,16 +7,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Bug
 from .forms import BugCreationForm
+from core.mixins import IsInProjectMixin
 
 
-class BugListView(ListView):
+class BugListView(LoginRequiredMixin, ListView):
     """View for listing bugs"""
     model = Bug
     template_name = 'bugs/list.html'
     context_object_name = 'bugs'
 
 
-class BugDetailView(DetailView):
+class BugDetailView(IsInProjectMixin, DetailView):
     """View for display bug detail"""
     model = Bug
     template_name = 'bugs/detail.html'

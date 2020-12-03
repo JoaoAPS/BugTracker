@@ -4,10 +4,11 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Member
 from .forms import MemberCreateForm
-from members.mixins import IsSuperuserMixin, IsSuperuserOrCurrentUserMixin
+from core.mixins import IsSuperuserMixin, IsCurrentUserMixin
 
 
 class MemberLoginView(LoginView):
@@ -15,12 +16,12 @@ class MemberLoginView(LoginView):
     template_name = 'registration/login.html'
 
 
-class MemberLogoutView(LogoutView):
+class MemberLogoutView(LoginRequiredMixin, LogoutView):
     """View for logging out users"""
     next_page = '/'
 
 
-class MemberListView(IsSuperuserMixin, ListView):
+class MemberListView(LoginRequiredMixin, ListView):
     """View for listing members"""
     model = Member
     template_name = 'members/list.html'
@@ -45,7 +46,7 @@ class MemberCreateView(IsSuperuserMixin, CreateView):
         return redirect(self.get_success_url())
 
 
-class MemberDetailView(IsSuperuserOrCurrentUserMixin, DetailView):
+class MemberDetailView(IsCurrentUserMixin, DetailView):
     """View for displaying member detail"""
     model = Member
     template_name = 'members/profile.html'
