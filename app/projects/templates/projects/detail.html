@@ -38,7 +38,7 @@
 	{% if project.bugs.all %}
 		<ol>
 			{% for bug in project.bugs.all %}
-				<li><a href="#">bug.name</a></li>
+				<li><a href="{% url 'bugs:detail' bug.id %}">{{ bug.title }}</a></li>
 			{% endfor %}
 		</ol>
 	{% else %}
