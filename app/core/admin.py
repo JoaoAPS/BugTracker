@@ -7,12 +7,12 @@ from bugs.models import Bug
 
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ('email', 'name', 'is_superuser')
+    list_display = ('name', 'email', 'is_superuser')
     list_filter = ('is_superuser',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('name',)}),
-        ('Permissions', {'fields': ('is_superuser',)}),
+        ('Permissions', {'fields': ('is_superuser', 'is_staff')}),
     )
     add_fieldsets = (
         (None, {

@@ -8,14 +8,14 @@
 
 <body>
 	<h1>Team members:</h1>
-	{% if member_list %}
+	{% if members %}
 		<ul>
-		{% for member in member_list %}
-			<li>{{ member.name }}</li>
+		{% for member in members %}
+			<li><a href="{% url 'members:profile' member.id %}">{{ member.name }}</a></li>
 		{% endfor %}
 		</ul>
 	{% else %}
-		There are no members on the team
+		There are no members on the team.
 	{% endif %}
 </body>
 

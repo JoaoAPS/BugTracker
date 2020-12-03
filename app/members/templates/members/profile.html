@@ -8,6 +8,35 @@
 
 <body>
 	<h1>{{ member.name }}</h1>
+	
+	<h3>Projects</h3>
+	{% if member.projects.exists %}
+		<ul>
+			{% for project in member.projects.all %}
+				<li><a href="{%url 'projects:detail' project.id %}">
+					{{ project.title }}
+				</a></li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>Member is not working on any projects.</p>
+	{% endif %}
+	
+	<h3>Bugs</h3>
+	{% if member.assigned_bugs.all %}
+		<ul>
+			{% for bug in member.assigned_bugs.all %}
+				<li><a href="{%url 'bugs:detail' bug.id %}">
+					{{ bug.title }}
+					{% if bug.creator == member %}
+						(Created by member)
+					{% endif %}
+				</a></li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>Member is not assigned to any bugs.</p>
+	{% endif %}
 </body>
 
 </html>
