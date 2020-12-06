@@ -1,5 +1,7 @@
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
+from django.http.response import HttpResponseBadRequest
+from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
@@ -7,7 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Bug
 from .forms import BugCreationForm
-from core.mixins import IsInProjectMixin
+from core.mixins import IsInProjectMixin, IsSupervisorMixin
+from members.models import Member
 
 
 class BugListView(LoginRequiredMixin, ListView):
@@ -47,3 +50,18 @@ class BugCreateView(LoginRequiredMixin, CreateView):
         form.save_m2m()
 
         return redirect(self.get_success_url())
+
+
+class BugAssignMemberView(IsSupervisorMixin, View):
+    """Perform assignment of member to bug"""
+
+    def post(self, request, pk):
+        bug = get_object_or_404(Bug, pk=pk)
+
+        try:
+            member = Member.objects.get(id=request.POST['member_id'])
+            bug.assigned_members.add(member)
+        except Member.DoesNotExist:
+            return HttpResponseBadRequest()
+
+        return redirect('bugs:detail', pk=pk)

@@ -16,6 +16,8 @@
 	Created in {{ bug.creationDate }} by <a href="{% url 'members:profile' bug.creator.id %}">{{ bug.creator.name }}</a>.
 	
 	<h3>Assign Members:</h3>
+	<button>Assign a member</button>
+	
 	{% if bug.assigned_members.all %}
 		<ul>
 			{% for member in bug.assigned_members.all %}
@@ -25,6 +27,24 @@
 	{% else %}
 		<p>No members assigned to this bug.</p>
 	{% endif %}
+
+
+	<div class="assign-form">
+		<h3>Assign a member to the bug</h3>
+		
+		<form action="{% url 'bugs:assign_member' bug.id %}" method="POST">
+			{% csrf_token %}
+			<label for="member_id">Select member:</label>
+			<select name="member_id" id="member_id">
+				{% for member in bug.project.members.all %}
+					<option value="{{ member.id }}">{{ member.name }}</option>
+				{% endfor %}
+			</select>
+			
+			<button>Assign member</button>
+		</form>
+	</div>
+
 
 </body>
 

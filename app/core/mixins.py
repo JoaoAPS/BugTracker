@@ -44,3 +44,26 @@ class IsInProjectMixin(UserPassesTestMixin):
         print('IsInProjectMixin should be used only on models view of projects\
             and bugs!')
         return False
+
+
+class IsSupervisorMixin(UserPassesTestMixin):
+    """Mixin that only allows to view if user is a supervisor of the project"""
+    login_url = reverse_lazy('members:login')
+
+    def test_func(self):
+        if self.request.user.is_superuser:
+            return True
+
+        if self.model:
+            if self.model == Project:
+                supervised_projs = self.request.user.supervised_projects.all()
+                return self.kwargs['pk'] in supervised_projs
+
+            if self.model == Bug:
+                current_bug = Bug.objects.get(id=self.kwargs['pk'])
+                supervised_projs = self.request.user.supervised_projects.all()
+                return current_bug.project in supervised_projs
+
+        print('IsSupervisorMixin should be used only on models view of \
+            projects and bugs!')
+        return False

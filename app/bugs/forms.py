@@ -8,4 +8,10 @@ class BugCreationForm(forms.ModelForm):
 
     class Meta:
         model = Bug
-        exclude = ['_status', 'creationDate', 'closingDate', 'creator']
+        exclude = [
+            '_status',
+            'creationDate',
+            'closingDate',
+            'creator',
+            'assigned_members'
+        ]
