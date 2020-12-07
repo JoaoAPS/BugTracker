@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Report bug</title>
-</head>
+{% extends "core/base.html" %}
 
-<body>
-	<strong>User:</strong> {{ user }}
+{% block title %}Report bug{% endblock %}
+
+{% block content %}
 	<h1>Report a new bug</h1>
 	
 	<form method="post">
@@ -17,7 +12,4 @@
 		<br>
 		<button>Report Bug!</button>
 	</form>
-</body>
-
-
-</html>
+{% endblock %}

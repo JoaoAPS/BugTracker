@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Member-Profile</title>
-</head>
+{% extends "core/base.html" %}
 
-<body>
+{% block title %}Profile{% endblock %}
+
+{% block content %}
 	<h1>{{ member.name }}</h1>
 	
 	<h3>Projects</h3>
@@ -37,6 +33,4 @@
 	{% else %}
 		<p>Member is not assigned to any bugs.</p>
 	{% endif %}
-</body>
-
-</html>
+{% endblock %}

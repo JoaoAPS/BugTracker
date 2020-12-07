@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Team Members</title>
-</head>
+{% extends "core/base.html" %}
 
-<body>
+{% block title %}Team members{% endblock %}
+
+{% block content %}
 	<h1>Team members:</h1>
 	{% if members %}
 		<ul>
@@ -17,6 +13,4 @@
 	{% else %}
 		There are no members on the team.
 	{% endif %}
-</body>
-
-</html>
+{% endblock %}

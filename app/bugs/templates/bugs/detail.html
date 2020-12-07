@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Bug Page</title>
-</head>
+{% extends "core/base.html" %}
 
-<body>
+{% block title %}Bug page{% endblock %}
+
+{% block content %}
 	<h1>{{ bug.title }}</h1>
 	
 	<p><strong>Project:</strong> <a href="{% url 'projects:detail' bug.project.id %}">{{ bug.project.title }}</a></p>
@@ -44,8 +40,4 @@
 			<button>Assign member</button>
 		</form>
 	</div>
-
-
-</body>
-
-</html>
+{% endblock %}

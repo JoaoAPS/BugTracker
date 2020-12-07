@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Register new member</title>
-</head>
+{% extends "core/base.html" %}
 
-<body>
+{% block title %}Register new member{% endblock %}
+
+{% block content %}
 	<h1>Regiter new member</h1>
 	
 	<form action="{% url 'members:register' %}" method="post">
@@ -16,7 +12,4 @@
 		<br>
 		<button>Register</button>
 	</form>
-</body>
-
-
-</html>
+{% endblock %}

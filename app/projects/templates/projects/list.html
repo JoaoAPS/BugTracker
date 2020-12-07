@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Projects</title>
-</head>
+{% extends "core/base.html" %}
 
-<body>
+{% block title %}Projects{% endblock %}
+
+{% block content %}
 	<h1>Projects:</h1>
 	{% if projects %}
 		<ul>
@@ -17,6 +13,4 @@
 	{% else %}
 		No projects found
 	{% endif %}
-</body>
-
-</html>
+{% endblock %}
