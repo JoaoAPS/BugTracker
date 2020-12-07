@@ -3,8 +3,11 @@
 {% block title %}Bugs{% endblock %}
 
 {% block content %}
-	<h1>Bugs:</h1>
+	<h1>Bugs</h1>
+	
 	{% if bugs %}
+		<p>{{ bugs|length }} active bug{{ bugs|pluralize }}.</p>
+	
 		<ul>
 		{% for bug in bugs %}
 			<li><a href="{% url 'bugs:detail' bug.id %}">{{ bug.title }}</a></li>

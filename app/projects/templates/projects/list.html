@@ -3,8 +3,11 @@
 {% block title %}Projects{% endblock %}
 
 {% block content %}
-	<h1>Projects:</h1>
+	<h1>Projects</h1>
+
 	{% if projects %}
+		<p>{{ projects|length }} active project{{ projects|pluralize }}.</p>
+		
 		<ul>
 		{% for project in projects %}
 			<li><a href="{% url 'projects:detail' project.id %}">{{ project.title }}</a></li>
