@@ -1,9 +1,9 @@
 {% if request.path|slice:"1:5" == model %}
-	<li class="nav-item">
+	<li class="nav-item {{ classes }}">
 		<a class="nav-link active" aria-current="page" href="{{ link }}">{{ name }}</a>
 	</li>
 {% else %}
-	<li class="nav-item">
+	<li class="nav-item {{classes }}">
 		<a class="nav-link" href="{{ link }}">{{ name }}</a>
 	</li>
 {% endif %}

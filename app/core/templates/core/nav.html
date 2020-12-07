@@ -1,8 +1,11 @@
 {% url 'bugs:list' as bug_url %}
 {% url 'projects:list' as project_url %}
 {% url 'members:list' as member_url %}
+{% url 'members:profile' user.id as profile_url %}
+{% url 'members:login' as login_url %}
+{% url 'members:logout' as logout_url %}
 
-<nav class="navbar navbar-expand-md navbar-light bg-light">
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
 	<div class="container-fluid">
 		<a class="navbar-brand" href="/">Home</a>
 		<button
@@ -17,12 +20,21 @@
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		
-		<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			<ul class="navbar-nav ms-4 me-auto mb-2 mb-md-0">
-				{% include 'core/nav-item.html' with model="proj" name="Projects" link=project_url %}
-				{% include 'core/nav-item.html' with model="bugs" name="Bugs" link=bug_url %}
-				{% include 'core/nav-item.html' with model="memb" name="Members" link=member_url %}
-			</ul>
-		</div>
+		{% if user.is_authenticated %}
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav ms-4 me-auto mb-2 mb-md-0">
+					{% include 'core/nav-item.html' with model="proj" name="Projects" link=project_url %}
+					{% include 'core/nav-item.html' with model="bugs" name="Bugs" link=bug_url %}
+					{% include 'core/nav-item.html' with model="memb" name="Members" link=member_url %}
+					
+				</ul>
+				<ul class="navbar-nav">
+					{% include 'core/nav-item.html' with model="prof" name="Profile" link=profile_url%}
+					{% include 'core/nav-item.html' with name="Log out" link=logout_url %}
+				</ul>
+			</div>
+		{% else %}
+			{% include 'core/nav-item.html' with name="Log in" link=login_url %}
+		{% endif %}
 	</div>
 </nav>
