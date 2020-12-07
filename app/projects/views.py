@@ -14,6 +14,7 @@ class ProjectListView(LoginRequiredMixin, ListView):
     model = Project
     template_name = 'projects/list.html'
     context_object_name = 'projects'
+    login_url = reverse_lazy('members:login')
 
 
 class ProjectDetailView(IsInProjectMixin, DetailView):
@@ -28,6 +29,7 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectCreateForm
     template_name = 'projects/create.html'
+    login_url = reverse_lazy('members:login')
 
     def get_success_url(self):
         return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})

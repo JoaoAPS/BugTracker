@@ -19,6 +19,7 @@ class MemberLoginView(LoginView):
 class MemberLogoutView(LoginRequiredMixin, LogoutView):
     """View for logging out users"""
     next_page = '/'
+    login_url = reverse_lazy('members:login')
 
 
 class MemberListView(LoginRequiredMixin, ListView):
@@ -26,6 +27,7 @@ class MemberListView(LoginRequiredMixin, ListView):
     model = Member
     template_name = 'members/list.html'
     context_object_name = 'members'
+    login_url = reverse_lazy('members:login')
 
 
 class MemberCreateView(IsSuperuserMixin, CreateView):

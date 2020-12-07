@@ -18,6 +18,7 @@ class BugListView(LoginRequiredMixin, ListView):
     model = Bug
     template_name = 'bugs/list.html'
     context_object_name = 'bugs'
+    login_url = reverse_lazy('members:login')
 
 
 class BugDetailView(IsInProjectMixin, DetailView):
