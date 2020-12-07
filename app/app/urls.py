@@ -1,10 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from .views import indexView
+from .views import IndexView
 
 urlpatterns = [
-    path('', indexView),
+    path('', IndexView.as_view(), name='index'),
     path('admin/', admin.site.urls),
     path('members/', include('members.urls')),
     path('projects/', include('projects.urls')),

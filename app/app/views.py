@@ -1,6 +1,6 @@
-from django.http import HttpResponse
+from django.views.generic import TemplateView
 
 
-def indexView(request):
+class IndexView(TemplateView):
     """Home page view of the application"""
-    return HttpResponse('<h1>Home<h1>')
+    template_name = 'core/index.html'
