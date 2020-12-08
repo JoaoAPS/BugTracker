@@ -7,7 +7,7 @@
 	{% if members %}
 		<ul>
 		{% for member in members %}
-			<li><a href="{% url 'members:profile' member.id %}">{{ member.name }}</a></li>
+			<li><a href="{% url 'members:detail' member.id %}">{{ member.name }}</a></li>
 		{% endfor %}
 		</ul>
 	{% else %}

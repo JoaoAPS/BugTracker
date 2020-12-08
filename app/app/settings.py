@@ -130,4 +130,4 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'members.Member'
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'member-profile'

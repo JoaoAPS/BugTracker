@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from .views import IndexView
+from core.views import IndexView
+from members.views import MemberProfileView
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -9,4 +10,5 @@ urlpatterns = [
     path('members/', include('members.urls')),
     path('projects/', include('projects.urls')),
     path('bugs/', include('bugs.urls')),
+    path('profile/', MemberProfileView.as_view(), name='member-profile'),
 ]

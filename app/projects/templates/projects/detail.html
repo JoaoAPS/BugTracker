@@ -11,7 +11,7 @@
 	{% if project.supervisors.all %}
 		<ul>
 			{% for supervisor in project.supervisors.all %}
-				<li><a href="{% url 'members:profile' supervisor.id %}">{{ supervisor.name }}</a></li>
+				<li><a href="{% url 'members:detail' supervisor.id %}">{{ supervisor.name }}</a></li>
 			{% endfor %}
 		</ul>
 	{% else %}
@@ -23,7 +23,7 @@
 	{% if project.members.all %}
 		<ul>
 			{% for member in project.members.all %}
-				<li><a href="{% url 'members:profile' member.id %}">{{ member.name }}</a></li>
+				<li><a href="{% url 'members:detail' member.id %}">{{ member.name }}</a></li>
 			{% endfor %}
 		</ul>
 	{% else %}

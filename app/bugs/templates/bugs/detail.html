@@ -9,7 +9,7 @@
 	
 	<p>{{ bug.description }}</p>
 	
-	Created in {{ bug.creationDate }} by <a href="{% url 'members:profile' bug.creator.id %}">{{ bug.creator.name }}</a>.
+	Created in {{ bug.creationDate }} by <a href="{% url 'members:detail' bug.creator.id %}">{{ bug.creator.name }}</a>.
 	
 	<h3>Assign Members:</h3>
 	<button>Assign a member</button>
@@ -17,7 +17,7 @@
 	{% if bug.assigned_members.all %}
 		<ul>
 			{% for member in bug.assigned_members.all %}
-				<li><a href="{% url 'members:profile' member.id %}">{{ member.name }}</a></li>
+				<li><a href="{% url 'members:detail' member.id %}">{{ member.name }}</a></li>
 			{% endfor %}
 		</ul>
 	{% else %}

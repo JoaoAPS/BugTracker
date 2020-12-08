@@ -1,26 +1,26 @@
 {% url 'bugs:list' as bug_url %}
 {% url 'projects:list' as project_url %}
 {% url 'members:list' as member_url %}
-{% url 'members:profile' user.id as profile_url %}
+{% url 'member-profile' as profile_url %}
 {% url 'members:login' as login_url %}
 {% url 'members:logout' as logout_url %}
 
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
 	<div class="container-fluid">
-		<a class="navbar-brand" href="/">Home</a>
-		<button
-			class="navbar-toggler"
-			type="button"
-			data-bs-toggle="collapse"
-			data-bs-target="#navbarSupportedContent"
-			aria-controls="navbarSupportedContent"
-			aria-expanded="false"
-			aria-label="Toggle navigation"
-		>
-			<span class="navbar-toggler-icon"></span>
-		</button>
-		
 		{% if user.is_authenticated %}
+			<a class="navbar-brand" href="/">Home</a>
+			<button
+				class="navbar-toggler"
+				type="button"
+				data-bs-toggle="collapse"
+				data-bs-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent"
+				aria-expanded="false"
+				aria-label="Toggle navigation"
+			>
+				<span class="navbar-toggler-icon"></span>
+			</button>
+		
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav ms-4 me-auto mb-2 mb-md-0">
 					{% include 'core/nav-item.html' with model="proj" name="Projects" link=project_url %}
@@ -34,7 +34,7 @@
 				</ul>
 			</div>
 		{% else %}
-			{% include 'core/nav-item.html' with name="Log in" link=login_url %}
+			<h4 class="text-light">Our Team's Bugtracker</h4>
 		{% endif %}
 	</div>
 </nav>

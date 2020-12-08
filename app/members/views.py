@@ -53,3 +53,13 @@ class MemberDetailView(IsCurrentUserMixin, DetailView):
     model = Member
     template_name = 'members/profile.html'
     context_object_name = 'member'
+
+
+class MemberProfileView(LoginRequiredMixin, DetailView):
+    template_name = 'members/profile.html'
+    context_object_name = 'member'
+    login_url = reverse_lazy('members:login')
+
+    def get_object(self):
+        """Return the current authenticated member"""
+        return self.request.user

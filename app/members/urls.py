@@ -10,7 +10,7 @@ urlpatterns = [
     path(
         '<int:pk>',
         views.MemberDetailView.as_view(),
-        name='profile'
+        name='detail'
     ),
     path('login', views.MemberLoginView.as_view(), name='login'),
     path('logout', views.MemberLogoutView.as_view(), name='logout'),
