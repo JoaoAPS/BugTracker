@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Bugtracker{% endblock %}
+
+{% block content %}
+
+<div class="my-5">
+	<h2>Welcome to <span class="text-primary">Our Team's Bugtracker.<span></h2>
+	<br>
+	<h4>To continue please <strong>Log In</strong>:</h4>
+</div>
+
+<form method="POST" class="mb-5">
+	<div class="container">
+		{% csrf_token %}
+		
+		<div class="row">
+			<div class="col-md-6 offset-1">
+				{% for field in form %}
+					<div class="row mb-1">
+						{{ field.errors }}
+						<div class="col-md-4 text-end">
+							<label for="{{ field.id_for_label }}">{{ field.label }}</label>
+						</div>
+						<div class="col-md d-flex">
+							{{ field|add_class:"flex-fill" }}
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+			
+			<div class="col-md-2 d-flex justify-content-center align-items-center">
+				<button class="btn btn-primary p-4">Log in</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+<div class="container pt-5">
+	<p>If you are not a member yet, plase contact your supervisor for registration.</p>
+</div>
+
+
+{% endblock %}
+
