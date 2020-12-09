@@ -58,7 +58,8 @@ class IsSupervisorMixin(UserPassesTestMixin):
         if self.model:
             if self.model == Project:
                 supervised_projs = self.request.user.supervised_projects.all()
-                return self.kwargs['pk'] in supervised_projs
+                current_project = self.model.get(pk=self.kwargs['pk'])
+                return current_project in supervised_projs
 
             if self.model == Bug:
                 current_bug = Bug.objects.get(id=self.kwargs['pk'])
