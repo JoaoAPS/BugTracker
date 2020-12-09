@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block title %}Edit project{% endblock %}
+
+{% block content %}
+	<h1>Edit project - {{ project.title }}</h1>
+	
+	<form method="post">
+		{% csrf_token %}
+		{{ form.as_p }}
+		
+		<br>
+		<button>Update Project!</button>
+	</form>
+	
+	<button>Change project status</button>
+{% endblock %}

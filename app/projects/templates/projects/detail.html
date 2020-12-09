@@ -8,7 +8,7 @@
 			<div class="d-flex justify-content-between align-items-center">
 				<h1>{{ project.title }}</h1>
 				{% if isAdminOrSupervisor %}
-					<a href="{% url 'projects:update' project.id">
+					<a href="{% url 'projects:update' project.id %}">
 						<button class="btn btn-danger">Edit Project</button>
 					</a>
 				{% endif %}

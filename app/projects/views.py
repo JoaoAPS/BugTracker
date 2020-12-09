@@ -1,12 +1,12 @@
 from django.urls import reverse_lazy
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Project
 from .forms import ProjectCreateForm
-from core.mixins import IsInProjectMixin
+from core.mixins import IsInProjectMixin, IsSupervisorMixin
 
 
 class ProjectListView(LoginRequiredMixin, ListView):
@@ -54,6 +54,17 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectCreateForm
     template_name = 'projects/create.html'
+    login_url = reverse_lazy('members:login')
+
+    def get_success_url(self):
+        return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})
+
+
+class ProjectUpdateView(IsSupervisorMixin, UpdateView):
+    """View for creating new projects"""
+    model = Project
+    form_class = ProjectCreateForm
+    template_name = 'projects/update.html'
     login_url = reverse_lazy('members:login')
 
     def get_success_url(self):
