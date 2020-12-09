@@ -4,7 +4,7 @@ from django.http.response import HttpResponseBadRequest
 from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Bug
@@ -53,7 +53,7 @@ class BugCreateView(LoginRequiredMixin, CreateView):
         return redirect(self.get_success_url())
 
 
-class BugUpdateView(LoginRequiredMixin, CreateView):
+class BugUpdateView(LoginRequiredMixin, UpdateView):
     """View for creating bugs"""
     form_class = BugCreationForm
     template_name = 'bugs/update.html'
