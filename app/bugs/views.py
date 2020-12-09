@@ -53,6 +53,17 @@ class BugCreateView(LoginRequiredMixin, CreateView):
         return redirect(self.get_success_url())
 
 
+class BugUpdateView(LoginRequiredMixin, CreateView):
+    """View for creating bugs"""
+    form_class = BugCreationForm
+    template_name = 'bugs/update.html'
+    login_url = reverse_lazy('members:login')
+
+    def get_success_url(self):
+        """Return the url to the current object detail page"""
+        return reverse_lazy('bugs:detail', args=[self.object.id])
+
+
 class BugAssignMemberView(IsSupervisorMixin, View):
     """Perform assignment of member to bug"""
 
