@@ -3,34 +3,53 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-	<h1>{{ member.name }}</h1>
+	<div class="d-flex flex-column h-100 pt-2">
+		<div>
+			<h1>Hello, {{ member.get_short_name }}</h1>
+		</div>
+
+		<div class="row mt-3 flex-grow-1">
+			<div class="col-md-8 mb-2">
+				<h3 class="text-center text-primary">Assigned Bugs</h3>
+				
+				{% if member.assigned_bugs.all %}
+					<ul class="list-group list-group-flush">
+						{% for bug in member.assigned_bugs.all %}
+							<a
+								class="list-group-item list-group-item-action py-3 text-dark text-decoration-none"
+								href="{%url 'bugs:detail' bug.id %}"
+							>
+								<span class="fs-5">{{ bug.title }}</span>
+								<span class="text-secondary">({{ bug.project.title }})</span>
+								{% if bug.creator == member %}
+									<span class="badge bg-primary">creator</span>
+								{% endif %}
+							</a>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<p>You don't have any bug assigned to you.</p>
+				{% endif %}
+			</div>
+			
+			<div class="col-md">
+				<h3 class="text-center text-primary">Projects</h3>
+				
+				{% if member.projects.exists %}
+					<ul>
+						{% for project in member.projects.all %}
+							<li class="py-2">
+								<a class="text-dark text-decoration-none fs-4" href="{%url 'projects:detail' project.id %}">
+									{{ project.title }}
+								</a>
+							</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<p>You are not part of any project.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 	
-	<h3>Projects</h3>
-	{% if member.projects.exists %}
-		<ul>
-			{% for project in member.projects.all %}
-				<li><a href="{%url 'projects:detail' project.id %}">
-					{{ project.title }}
-				</a></li>
-			{% endfor %}
-		</ul>
-	{% else %}
-		<p>Member is not working on any projects.</p>
-	{% endif %}
-	
-	<h3>Bugs</h3>
-	{% if member.assigned_bugs.all %}
-		<ul>
-			{% for bug in member.assigned_bugs.all %}
-				<li><a href="{%url 'bugs:detail' bug.id %}">
-					{{ bug.title }}
-					{% if bug.creator == member %}
-						(Created by member)
-					{% endif %}
-				</a></li>
-			{% endfor %}
-		</ul>
-	{% else %}
-		<p>Member is not assigned to any bugs.</p>
-	{% endif %}
 {% endblock %}
