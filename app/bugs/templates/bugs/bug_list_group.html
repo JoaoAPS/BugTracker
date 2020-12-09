@@ -1,0 +1,14 @@
+<ul class="list-group list-group-flush">
+	{% for bug in bugs.all %}
+		<a
+			class="list-group-item list-group-item-action py-3 text-dark text-decoration-none"
+			href="{%url 'bugs:detail' bug.id %}"
+		>
+			<span class="fs-5">{{ bug.title }}</span>
+			<span class="text-secondary">({{ bug.project.title }})</span>
+			{% if bug.creator == member %}
+				<span class="badge bg-primary">creator</span>
+			{% endif %}
+		</a>
+	{% endfor %}
+</ul>

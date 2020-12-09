@@ -23,6 +23,31 @@ class ProjectDetailView(IsInProjectMixin, DetailView):
     template_name = 'projects/detail.html'
     context_object_name = 'project'
 
+    def get_context_data(self, **kwargs):
+        """Add the project bugs separated by assigned user"""
+        context = super().get_context_data(**kwargs)
+
+        context['user_bugs'] = self.object.bugs.filter(
+            assigned_members__id__contains=self.request.user.id
+        )
+        context['other_bugs'] = self.object.bugs.exclude(
+            assigned_members__id__contains=self.request.user.id
+        )
+
+        context['isAdminOrSupervisor'] = (
+            self.request.user.is_superuser or
+            self.request.user in self.object.supervisors.all()
+        )
+
+        context['status_class'] = {
+            'ON-GOING': 'text-primary',
+            'CLOSED': 'text-danger',
+            'FINISHED': 'text-success',
+            'PAUSED': 'text-secondary'
+        }[self.object.status]
+
+        return context
+
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     """View for creating new projects"""

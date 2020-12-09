@@ -13,20 +13,7 @@
 				<h3 class="text-center text-primary">Assigned Bugs</h3>
 				
 				{% if member.assigned_bugs.all %}
-					<ul class="list-group list-group-flush">
-						{% for bug in member.assigned_bugs.all %}
-							<a
-								class="list-group-item list-group-item-action py-3 text-dark text-decoration-none"
-								href="{%url 'bugs:detail' bug.id %}"
-							>
-								<span class="fs-5">{{ bug.title }}</span>
-								<span class="text-secondary">({{ bug.project.title }})</span>
-								{% if bug.creator == member %}
-									<span class="badge bg-primary">creator</span>
-								{% endif %}
-							</a>
-						{% endfor %}
-					</ul>
+					{% include 'bugs/bug_list_group.html' with bugs=member.assigned_bugs %}
 				{% else %}
 					<p>You don't have any bug assigned to you.</p>
 				{% endif %}

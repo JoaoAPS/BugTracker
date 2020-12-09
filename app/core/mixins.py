@@ -35,7 +35,8 @@ class IsInProjectMixin(UserPassesTestMixin):
 
         if self.model:
             if self.model == Project:
-                return self.kwargs['pk'] in self.request.user.projects.all()
+                project = self.model.objects.get(pk=self.kwargs['pk'])
+                return project in self.request.user.projects.all()
 
             if self.model == Bug:
                 current_bug = Bug.objects.get(id=self.kwargs['pk'])

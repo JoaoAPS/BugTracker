@@ -3,41 +3,91 @@
 {% block title %}Project Page{% endblock %}
 
 {% block content %}
-	<h1>{{ project.title }}</h1>
-	
-	<p>{{ project.description }}</p>
-	
-	<h3>Supervisors:</h3>
-	{% if project.supervisors.all %}
-		<ul>
-			{% for supervisor in project.supervisors.all %}
-				<li><a href="{% url 'members:detail' supervisor.id %}">{{ supervisor.name }}</a></li>
-			{% endfor %}
-		</ul>
-	{% else %}
-		<p>This project has no supervisors.</p>
-	{% endif %}
-	
-	
-	<h3>Members:</h3>
-	{% if project.members.all %}
-		<ul>
-			{% for member in project.members.all %}
-				<li><a href="{% url 'members:detail' member.id %}">{{ member.name }}</a></li>
-			{% endfor %}
-		</ul>
-	{% else %}
-		<p>This project has no members.</p>
-	{% endif %}
-	
-	<h3>Bugs:</h3>
-	{% if project.bugs.all %}
-		<ol>
-			{% for bug in project.bugs.all %}
-				<li><a href="{% url 'bugs:detail' bug.id %}">{{ bug.title }}</a></li>
-			{% endfor %}
-		</ol>
-	{% else %}
-		<p>No bugs in the project.</p>
-	{% endif %}
+	<div class="row">
+		<div class="col-md-9">
+			<div class="d-flex justify-content-between align-items-center">
+				<h1>{{ project.title }}</h1>
+				{% if isAdminOrSupervisor %}
+					<a href="{% url 'projects:update' project.id">
+						<button class="btn btn-danger">Edit Project</button>
+					</a>
+				{% endif %}
+			</div>
+			<small class="text-secondary">Status:</small>
+			<small class="{{ status_class }}">{{ project.status|title }}</small>
+			
+			<div class="card bg-light border-0 mt-1">
+				<div class="card-body">
+					{{ project.description }}
+				</div>
+			</div>
+			
+			{% if project.status == 'ON-GOING' %}
+				<a href="{% url 'bugs:create' %}" class="mt-4">
+					<button class="btn btn-success mt-4">Report Bug</button>
+				</a>
+			{% endif %}
+			
+			{% if project.bugs.all %}
+				{% if user_bugs.all %}
+					<h3 class="text-primary mt-3">Your Bugs</h3>
+					{% include 'bugs/bug_list_group.html' with bugs=user_bugs member=user %}
+					<h3 class="text-primary mt-3">Other project bugs</h3>
+				{% else %}
+					<h3 class="text-primary mt-3">Active bugs</h3>
+				{% endif %}
+				
+				{% if other_bugs %}
+					{% include 'bugs/bug_list_group.html' with bugs=other_bugs member=user %}
+				{% else %}
+					<p>No other bugs.</p>
+				{% endif %}
+			{% else %}
+				<h3 class="text-primary mt-3">Active Bugs</h3>
+				<p>No bugs in the project.</p>
+			{% endif %}
+		</div>
+		
+		<div class="col-md d-flex flex-column">
+			<h3>Supervisors:</h3>
+			{% if isAdminOrSupervisor and project.status == 'ON-GOING' %}
+				<button class="btn btn-danger align-self-center">Add Supervisor</button>
+			{% endif %}
+			
+			{% if project.supervisors.all %}
+				<ul>
+					{% for supervisor in project.supervisors.all %}
+						<li class="py-2">
+							<a href="{% url 'members:detail' supervisor.id %}" class="text-dark text-decoration-none fs-5">
+								{{ supervisor.name }}
+							</a>
+						</li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<p>This project has no supervisors.</p>
+			{% endif %}
+			
+			
+			<h3>Members:</h3>
+			{% if isAdminOrSupervisor and project.status == 'ON-GOING' %}
+				<button class="btn btn-danger align-self-center">Add Member</button>
+			{% endif %}
+			
+			{% if project.members.all %}
+				<ul>
+					{% for member in project.members.all %}
+						<li class="py-2">
+							<a href="{% url 'members:detail' member.id %}" class="text-dark text-decoration-none fs-5">
+								{{ member.name }}
+							</a>
+						</li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<p>This project has no members.</p>
+			{% endif %}
+			
+		</div>
+	</div>
 {% endblock %}
