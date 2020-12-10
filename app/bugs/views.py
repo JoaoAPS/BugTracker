@@ -27,6 +27,23 @@ class BugDetailView(IsInProjectMixin, DetailView):
     template_name = 'bugs/detail.html'
     context_object_name = 'bug'
 
+    def get_context_data(self, **kwargs):
+        """Add additional data to the context"""
+        context = super().get_context_data(**kwargs)
+
+        context['isAdminOrSupervisor'] = (
+            self.request.user.is_superuser or
+            self.request.user in self.object.supervisors.all()
+        )
+
+        context['status_class'] = {
+            'WAITING': 'text-warning',
+            'BEING WORKED': 'text-primary',
+            'FIXED': 'text-success'
+        }[self.object.status]
+
+        return context
+
 
 class BugCreateView(LoginRequiredMixin, CreateView):
     """View for creating bugs"""

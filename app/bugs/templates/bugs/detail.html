@@ -3,41 +3,95 @@
 {% block title %}Bug page{% endblock %}
 
 {% block content %}
-	<h1>{{ bug.title }}</h1>
-	
-	<p><strong>Project:</strong> <a href="{% url 'projects:detail' bug.project.id %}">{{ bug.project.title }}</a></p>
-	
-	<p>{{ bug.description }}</p>
-	
-	Created in {{ bug.creationDate }} by <a href="{% url 'members:detail' bug.creator.id %}">{{ bug.creator.name }}</a>.
-	
-	<h3>Assign Members:</h3>
-	<button>Assign a member</button>
-	
-	{% if bug.assigned_members.all %}
-		<ul>
-			{% for member in bug.assigned_members.all %}
-				<li><a href="{% url 'members:detail' member.id %}">{{ member.name }}</a></li>
-			{% endfor %}
-		</ul>
-	{% else %}
-		<p>No members assigned to this bug.</p>
-	{% endif %}
-
-
-	<div class="assign-form">
-		<h3>Assign a member to the bug</h3>
-		
-		<form action="{% url 'bugs:assign_member' bug.id %}" method="POST">
-			{% csrf_token %}
-			<label for="member_id">Select member:</label>
-			<select name="member_id" id="member_id">
-				{% for member in bug.project.members.all %}
-					<option value="{{ member.id }}">{{ member.name }}</option>
-				{% endfor %}
-			</select>
+	<div class="row">
+		<div class="col-md-9">
+			<div class="d-flex justify-content-between align-items-center">
+				<h1>{{ bug.title }}</h1>
+				{% if isAdminOrSupervisor %}
+					<a href="{% url 'bugs:update' bug.id %}">
+						<button class="btn btn-danger">Edit Bug</button>
+					</a>
+				{% endif %}
+			</div>
 			
-			<button>Assign member</button>
-		</form>
+			<span class="text-secondary">Project:</span>
+			<a href="{% url 'projects:detail' bug.project.id %}" class="text-decoration-none">
+				{{ bug.project.title }}
+			</a>
+			<span class="text-secondary"> - Bug created in {{ bug.creationDate|date:"j M. Y" }} by </span>
+			<a href="{% url 'members:detail' bug.creator.id %}" class="text-decoration-none">
+				{{ bug.creator.name }}
+			</a><span class="text-secondary">.</span>
+			
+			<br>
+			<small class="text-secondary">Status:</small>
+			<small class="{{ status_class }}">{{ bug.status|title }}</small>
+			
+			<div class="card bg-light border-0 mt-3">
+				<div class="card-body">
+					{{ bug.description }}
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-md d-flex flex-column">
+			<h4>Assigned Members:</h4>
+			{% if isAdminOrSupervisor and bug.status != 'FIXED' %}
+				<button class="btn btn-danger align-self-center" data-bs-toggle="modal" data-bs-target="#assign-modal">
+					Assign a member
+				</button>
+			{% endif %}
+
+			{% if bug.assigned_members.all %}
+				<ul>
+					{% for member in bug.assigned_members.all %}
+						<li class="py-2">
+							<a href="{% url 'members:detail' member.id %}" class="text-dark text-decoration-none fs-5">
+								{{ member.name }}
+							</a>
+						</li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<p>No members assigned to this bug.</p>
+			{% endif %}
+		</div>
+	</div>	
+
+
+	<div class="modal" tabindex="-1" id="assign-modal">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	    	
+	      <div class="modal-header">
+	        <h5 class="modal-title">Assign members to the bug</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      
+	      <div class="modal-body">
+	        <form id="assign_form" action="{% url 'bugs:assign_member' bug.id %}" method="POST">
+				{% csrf_token %}
+				
+				<select multiple class="form-select" name="member_id" id="member_id">
+					{% for member in bug.assigned_members.all %}
+						<option selected value="{{ member.id }}">{{ member.name }}</option>
+					{% endfor %}
+					<br>
+					{% for member in bug.project.members.all %}
+						{% if member not in bug.assigned_members.all %}
+							<option value="{{ member.id }}">{{ member.name }}</option>
+						{% endif %}
+					{% endfor %}
+				</select>				
+			</form>
+	      </div>
+	      
+	      <div class="modal-footer">
+	        <button type="button"  class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+	        <button type="submit" form="assign_form" class="btn btn-primary">Assign members</button>
+	      </div>
+	      
+	    </div>
+	  </div>
 	</div>
 {% endblock %}

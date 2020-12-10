@@ -24,7 +24,7 @@ class ProjectDetailView(IsInProjectMixin, DetailView):
     context_object_name = 'project'
 
     def get_context_data(self, **kwargs):
-        """Add the project bugs separated by assigned user"""
+        """Add additional data to the context"""
         context = super().get_context_data(**kwargs)
 
         context['user_bugs'] = self.object.bugs.filter(

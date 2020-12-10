@@ -6,11 +6,11 @@ from projects.models import Project
 
 class Bug(models.Model):
     """A bug in a project to be fixed"""
-    POSSIBLE_STATUS = ['OPEN', 'BEING WORKED', 'FIXED']
+    POSSIBLE_STATUS = ['WAITING', 'BEING WORKED', 'FIXED']
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    _status = models.CharField(max_length=15, default='OPEN')
+    _status = models.CharField(max_length=15, default='WAITING')
     creationDate = models.DateField(auto_now_add=True)
     closingDate = models.DateField(null=True, blank=True, default=None)
 
