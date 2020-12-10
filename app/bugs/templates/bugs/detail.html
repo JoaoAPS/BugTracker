@@ -72,11 +72,7 @@
 	        <form id="assign_form" action="{% url 'bugs:assign_member' bug.id %}" method="POST">
 				{% csrf_token %}
 				
-				<select multiple class="form-select" name="member_id" id="member_id">
-					{% for member in bug.assigned_members.all %}
-						<option selected value="{{ member.id }}">{{ member.name }}</option>
-					{% endfor %}
-					<br>
+				<select class="form-select" name="member_id">
 					{% for member in bug.project.members.all %}
 						{% if member not in bug.assigned_members.all %}
 							<option value="{{ member.id }}">{{ member.name }}</option>

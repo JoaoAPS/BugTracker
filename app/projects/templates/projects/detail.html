@@ -51,7 +51,9 @@
 		<div class="col-md d-flex flex-column">
 			<h3>Supervisors:</h3>
 			{% if isAdminOrSupervisor and project.status == 'ON-GOING' %}
-				<button class="btn btn-danger align-self-center">Add Supervisor</button>
+				<button class="btn btn-danger align-self-center" data-bs-toggle="modal" data-bs-target="#supervisor-modal">
+					Add Supervisor
+				</button>
 			{% endif %}
 			
 			{% if project.supervisors.all %}
@@ -71,7 +73,9 @@
 			
 			<h3>Members:</h3>
 			{% if isAdminOrSupervisor and project.status == 'ON-GOING' %}
-				<button class="btn btn-danger align-self-center">Add Member</button>
+				<button class="btn btn-danger align-self-center" data-bs-toggle="modal" data-bs-target="#member-modal">
+					Add Member
+				</button>
 			{% endif %}
 			
 			{% if project.members.all %}
@@ -86,8 +90,72 @@
 				</ul>
 			{% else %}
 				<p>This project has no members.</p>
-			{% endif %}
-			
+			{% endif %}	
 		</div>
+	</div>
+	
+	
+	<div class="modal" tabindex="-1" id="member-modal">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	    	
+	      <div class="modal-header">
+	        <h5 class="modal-title">Add members to project</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      
+	      <div class="modal-body">
+	        <form id="add_member_form" action="{% url 'projects:add_member' project.id %}" method="POST">
+				{% csrf_token %}
+				
+				<select class="form-select" name="member_id">
+					{% for member in all_members.all %}
+						{% if member not in project.members.all %}
+							<option value="{{ member.id }}">{{ member.name }}</option>
+						{% endif %}
+					{% endfor %}
+				</select>				
+			</form>
+	      </div>
+	      
+	      <div class="modal-footer">
+	        <button type="button"  class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+	        <button type="submit" form="add_member_form" class="btn btn-primary">Add members</button>
+	      </div>
+	      
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal" tabindex="-1" id="supervisor-modal">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	    	
+	      <div class="modal-header">
+	        <h5 class="modal-title">Add supervisors to project</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      
+	      <div class="modal-body">
+	        <form id="add_supervisor_form" action="{% url 'projects:add_supervisor' project.id %}" method="POST">
+				{% csrf_token %}
+				
+				<select class="form-select" name="supervisor_id">
+					{% for member in project.members.all %}
+						{% if member not in project.supervisors.all %}
+							<option value="{{ member.id }}">{{ member.name }}</option>
+						{% endif %}
+					{% endfor %}
+				</select>				
+			</form>
+	      </div>
+	      
+	      <div class="modal-footer">
+	        <button type="button"  class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+	        <button type="submit" form="add_supervisor_form" class="btn btn-primary">Add supervisors</button>
+	      </div>
+	      
+	    </div>
+	  </div>
 	</div>
 {% endblock %}

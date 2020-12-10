@@ -89,6 +89,8 @@ class BugAssignMemberView(IsSupervisorMixin, View):
 
         try:
             member = Member.objects.get(id=request.POST['member_id'])
+            if member not in bug.project.members.all():
+                return HttpResponseBadRequest()
             bug.assigned_members.add(member)
         except Member.DoesNotExist:
             return HttpResponseBadRequest()

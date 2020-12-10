@@ -1,4 +1,9 @@
+from django.shortcuts import get_object_or_404, redirect
+from django.http.response import HttpResponseBadRequest
 from django.urls import reverse_lazy
+from django.contrib.auth import get_user_model
+
+from django.views import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
@@ -46,6 +51,8 @@ class ProjectDetailView(IsInProjectMixin, DetailView):
             'PAUSED': 'text-secondary'
         }[self.object.status]
 
+        context['all_members'] = get_user_model().objects.all()
+
         return context
 
 
@@ -69,3 +76,37 @@ class ProjectUpdateView(IsSupervisorMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})
+
+
+class ProjectAddMemberView(IsSupervisorMixin, View):
+    """Add a member to the project"""
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        MemberModel = get_user_model()
+
+        try:
+            member = MemberModel.objects.get(id=request.POST['member_id'])
+            project.members.add(member)
+        except MemberModel.DoesNotExist:
+            return HttpResponseBadRequest()
+
+        return redirect('projects:detail', pk=pk)
+
+
+class ProjectAddSupervisorView(IsSupervisorMixin, View):
+    """Add a supervisor to the project"""
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        MemberModel = get_user_model()
+
+        try:
+            member = MemberModel.objects.get(id=request.POST['supervisor_id'])
+            if member not in project.members.all():
+                return HttpResponseBadRequest()
+            project.supervisors.add(member)
+        except MemberModel.DoesNotExist:
+            return HttpResponseBadRequest()
+
+        return redirect('projects:detail', pk=pk)
