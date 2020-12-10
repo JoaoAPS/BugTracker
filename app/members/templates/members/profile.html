@@ -1,42 +1,9 @@
-{% extends "core/base.html" %}
+{% extends "members/detail_base.html" %}
 
 {% block title %}Profile{% endblock %}
 
-{% block content %}
-	<div class="d-flex flex-column h-100 pt-2">
-		<div>
-			<h1>Hello, {{ member.get_short_name }}</h1>
-		</div>
+{% block name_title %}Hello, {{ member.get_short_name }}{% endblock %}
 
-		<div class="row mt-3 flex-grow-1">
-			<div class="col-md-8 mb-2">
-				<h3 class="text-center text-primary">Assigned Bugs</h3>
-				
-				{% if member.assigned_bugs.all %}
-					{% include 'bugs/bug_list_group.html' with bugs=member.assigned_bugs %}
-				{% else %}
-					<p>You don't have any bug assigned to you.</p>
-				{% endif %}
-			</div>
-			
-			<div class="col-md">
-				<h3 class="text-center text-primary">Projects</h3>
-				
-				{% if member.projects.exists %}
-					<ul>
-						{% for project in member.projects.all %}
-							<li class="py-2">
-								<a class="text-dark text-decoration-none fs-4" href="{%url 'projects:detail' project.id %}">
-									{{ project.title }}
-								</a>
-							</li>
-						{% endfor %}
-					</ul>
-				{% else %}
-					<p>You are not part of any project.</p>
-				{% endif %}
-			</div>
-		</div>
-	</div>
-	
-{% endblock %}
+{% block no_bug_message %}You don't have any bug assigned to you.{% endblock %}
+
+{% block no_project_message %}You are not part of any project.{% endblock %}

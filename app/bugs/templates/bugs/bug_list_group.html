@@ -5,7 +5,7 @@
 			href="{%url 'bugs:detail' bug.id %}"
 		>
 			<span class="fs-5">{{ bug.title }}</span>
-			{% if not omit_project %}
+			{% if show_projects %}
 				<span class="text-secondary">({{ bug.project.title }})</span>
 			{% endif %}
 			{% if bug.creator == member %}
