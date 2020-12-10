@@ -8,7 +8,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Bug
-from .forms import BugCreationForm
+from .forms import BugCreateForm, BugUpdateForm
 from core.mixins import IsInProjectMixin, IsSupervisorMixin
 from members.models import Member
 
@@ -47,7 +47,8 @@ class BugDetailView(IsInProjectMixin, DetailView):
 
 class BugCreateView(LoginRequiredMixin, CreateView):
     """View for creating bugs"""
-    form_class = BugCreationForm
+    model = Bug
+    form_class = BugCreateForm
     template_name = 'bugs/create.html'
     login_url = reverse_lazy('members:login')
 
@@ -72,7 +73,8 @@ class BugCreateView(LoginRequiredMixin, CreateView):
 
 class BugUpdateView(LoginRequiredMixin, UpdateView):
     """View for creating bugs"""
-    form_class = BugCreationForm
+    model = Bug
+    form_class = BugUpdateForm
     template_name = 'bugs/update.html'
     login_url = reverse_lazy('members:login')
 
