@@ -3,11 +3,18 @@
 {% block title %}Team members{% endblock %}
 
 {% block content %}
-	<h1>Team members:</h1>
+	<h1>Team members</h1>
 	{% if members %}
-		<ul>
+		<small class="text-secondary">{{ members|length }} active member{{ projects|length|pluralize }} on the team.</small>
+	
+		<ul class="list-group list-group-flush mt-3">
 		{% for member in members %}
-			<li><a href="{% url 'members:detail' member.id %}">{{ member.name }}</a></li>
+			<a class="list-group-item py-3 list-group-item-action text-dark" href="{% url 'members:detail' member.id %}">
+				{{ member.name }}
+				{% if member.is_superuser %}
+					<span class="badge bg-danger ms-2">Admin</span>
+				{% endif %}
+			</a>
 		{% endfor %}
 		</ul>
 	{% else %}
