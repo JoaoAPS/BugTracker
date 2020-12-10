@@ -28,17 +28,17 @@
 				</a>
 			{% endif %}
 			
-			{% if project.bugs.all %}
+			{% if project.active_bugs.all %}
 				{% if user_bugs.all %}
 					<h3 class="text-primary mt-3">Your Bugs</h3>
-					{% include 'bugs/bug_list_group.html' with bugs=user_bugs member=user omit_project=True%}
+					{% include 'bugs/bug_list_group.html' with bugs=user_bugs member=user show_status=True%}
 					<h3 class="text-primary mt-3">Other project bugs</h3>
 				{% else %}
 					<h3 class="text-primary mt-3">Active bugs</h3>
 				{% endif %}
 				
 				{% if other_bugs %}
-					{% include 'bugs/bug_list_group.html' with bugs=other_bugs member=user omit_project=True %}
+					{% include 'bugs/bug_list_group.html' with bugs=other_bugs member=user show_status=True %}
 				{% else %}
 					<p>No other bugs.</p>
 				{% endif %}

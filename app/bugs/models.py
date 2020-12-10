@@ -7,6 +7,13 @@ from projects.models import Project
 class Bug(models.Model):
     """A bug in a project to be fixed"""
     POSSIBLE_STATUS = ['WAITING', 'BEING WORKED', 'FIXED', 'CLOSED']
+    ACTIVE_STATUS = ['WAITING', 'BEING WORKED']
+    STATUS_CLASSES = {
+        'WAITING': 'warning',
+        'BEING WORKED': 'primary',
+        'FIXED': 'success',
+        'CLOSED': 'danger'
+    }
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -37,6 +44,11 @@ class Bug(models.Model):
             )
 
         self._status = status
+
+    @classmethod
+    def get_active(cls):
+        """Return a queryset with the active bugs"""
+        return cls.objects.filter(_status__in=cls.ACTIVE_STATUS)
 
     def __str__(self):
         """Return the string representation of the bug object"""

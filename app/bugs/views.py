@@ -22,10 +22,9 @@ class BugListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Return the list of projects applting filters"""
-        queryset = self.model.objects.all()
-
-        if not self.request.GET.get('show_inactive'):
-            queryset = queryset.filter(_status__in=['BEING WORKED', 'WAITING'])
+        queryset = self.model.objects.all() \
+            if self.request.GET.get('show_inactive') \
+            else self.model.get_active().all()
 
         return queryset
 
@@ -45,12 +44,9 @@ class BugDetailView(IsInProjectMixin, DetailView):
             self.request.user in self.object.project.supervisors.all()
         )
 
-        context['status_class'] = {
-            'WAITING': 'text-warning',
-            'BEING WORKED': 'text-primary',
-            'FIXED': 'text-success',
-            'CLOSED': 'text-danger',
-        }[self.object.status]
+        context['status_class'] = 'text-' + self.object.STATUS_CLASSES[
+            self.object.status
+        ]
 
         return context
 

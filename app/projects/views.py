@@ -23,10 +23,9 @@ class ProjectListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Return the list of projects applting filters"""
-        queryset = self.model.objects.all()
-
-        if not self.request.GET.get('show_inactive'):
-            queryset = queryset.filter(_status='ON-GOING')
+        queryset = self.model.objects.all() \
+            if self.request.GET.get('show_inactive') \
+            else self.model.get_active()
 
         return queryset
 
@@ -41,10 +40,10 @@ class ProjectDetailView(IsInProjectMixin, DetailView):
         """Add additional data to the context"""
         context = super().get_context_data(**kwargs)
 
-        context['user_bugs'] = self.object.bugs.filter(
+        context['user_bugs'] = self.object.active_bugs.filter(
             assigned_members__id__contains=self.request.user.id
         )
-        context['other_bugs'] = self.object.bugs.exclude(
+        context['other_bugs'] = self.object.active_bugs.exclude(
             assigned_members__id__contains=self.request.user.id
         )
 
