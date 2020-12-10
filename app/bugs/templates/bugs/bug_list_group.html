@@ -5,9 +5,30 @@
 			href="{%url 'bugs:detail' bug.id %}"
 		>
 			<span class="fs-5">{{ bug.title }}</span>
+			
 			{% if show_projects %}
 				<span class="text-secondary">({{ bug.project.title }})</span>
 			{% endif %}
+			
+			{% if show_status %}
+				-
+				{% if bug.status == 'WAITING' %}
+					<span class="text-warning">{{ bug.status|title }}</span>
+				{% elif bug.status == 'BEING WORKED' %}
+					<span class="text-primary">{{ bug.status|title }}</span>
+				{% elif bug.status == 'FIXED' %}
+					<span class="text-success">{{ bug.status|title }}</span>
+				{% elif bug.status == 'CLOSED' %}
+					<span class="text-danger">{{ bug.status|title }}</span>
+				{% endif %}
+			{% endif %}
+			
+			{% if show_assigned %}
+				{% if member in bug.assigned_members.all %}
+					<span class="badge bg-info">assigned</span>
+				{% endif %}
+			{% endif %}
+			
 			{% if bug.creator == member %}
 				<span class="badge bg-primary">creator</span>
 			{% endif %}

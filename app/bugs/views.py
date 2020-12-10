@@ -20,6 +20,15 @@ class BugListView(LoginRequiredMixin, ListView):
     context_object_name = 'bugs'
     login_url = reverse_lazy('members:login')
 
+    def get_queryset(self):
+        """Return the list of projects applting filters"""
+        queryset = self.model.objects.all()
+
+        if not self.request.GET.get('show_inactive'):
+            queryset = queryset.filter(_status__in=['BEING WORKED', 'WAITING'])
+
+        return queryset
+
 
 class BugDetailView(IsInProjectMixin, DetailView):
     """View for display bug detail"""
@@ -39,7 +48,8 @@ class BugDetailView(IsInProjectMixin, DetailView):
         context['status_class'] = {
             'WAITING': 'text-warning',
             'BEING WORKED': 'text-primary',
-            'FIXED': 'text-success'
+            'FIXED': 'text-success',
+            'CLOSED': 'text-danger',
         }[self.object.status]
 
         return context

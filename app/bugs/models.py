@@ -6,7 +6,7 @@ from projects.models import Project
 
 class Bug(models.Model):
     """A bug in a project to be fixed"""
-    POSSIBLE_STATUS = ['WAITING', 'BEING WORKED', 'FIXED']
+    POSSIBLE_STATUS = ['WAITING', 'BEING WORKED', 'FIXED', 'CLOSED']
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)

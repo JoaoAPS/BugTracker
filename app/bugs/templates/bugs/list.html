@@ -3,16 +3,28 @@
 {% block title %}Bugs{% endblock %}
 
 {% block content %}
-	<h1>Bugs</h1>
+	<div class="d-flex align-items-center">
+		<h1 class="me-auto">Bugs</h1>
+		
+		{% if request.GET.show_inactive %}
+			<a href="{% url 'bugs:list' %}" class="btn btn-secondary">
+				Hide Inactives
+			</a>
+		{% else %}
+			<a href="{% url 'bugs:list' %}?show_inactive=1" class="btn btn-outline-secondary">
+				Show Inactives
+			</a>
+		{% endif %}
+	</div>
 	
 	{% if bugs %}
-		<p>{{ bugs|length }} active bug{{ bugs|pluralize }}.</p>
-	
-		<ul>
-		{% for bug in bugs %}
-			<li><a href="{% url 'bugs:detail' bug.id %}">{{ bug.title }}</a></li>
-		{% endfor %}
-		</ul>
+		{% if request.GET.show_inactive %}
+			<small class="text-secondary">{{ bugs|length }} bug{{ bugs|length|pluralize }}</small>
+		{% else %}
+			<small class="text-secondary">{{ bugs|length }} active bug{{ bugs|length|pluralize }}</small>
+		{% endif %}
+		
+		{% include 'bugs/bug_list_group.html' with member=request.user show_projects=True show_assigned=True show_status=True %}
 	{% else %}
 		No bugs found
 	{% endif %}
