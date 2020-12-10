@@ -48,11 +48,12 @@ class MemberCreateView(IsSuperuserMixin, CreateView):
         return redirect(self.get_success_url())
 
 
-class MemberDetailView(IsCurrentUserMixin, DetailView):
+class MemberDetailView(LoginRequiredMixin, DetailView):
     """View for displaying member detail"""
     model = Member
     template_name = 'members/detail.html'
     context_object_name = 'member'
+    login_url = reverse_lazy('members:login')
 
 
 class MemberProfileView(LoginRequiredMixin, DetailView):

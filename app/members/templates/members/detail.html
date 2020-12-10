@@ -4,8 +4,11 @@
 
 {% block content %}
 	<div class="d-flex flex-column h-100 pt-2">
-		<div>
+		<div class="d-flex align-items-center">
 			<h1>{{ member.name }}</h1>
+			{% if member.is_superuser %}
+				<span class="badge badge-sm bg-danger ms-3">Admin</span>
+			{% endif %}
 		</div>
 
 		<div class="row mt-3 flex-grow-1">
