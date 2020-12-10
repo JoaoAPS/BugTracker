@@ -61,7 +61,15 @@ class Member(AbstractUser):
 
     def get_short_name(self):
         """Return the first name of the member"""
-        return self.name.split(' ')[0]
+        names = self.name.split(' ')
+        short_name = names[0]
+
+        i = 1
+        while i < len(names) and len(short_name + names[i]) < 9:
+            short_name += ' ' + names[i]
+            i += 1
+
+        return short_name
 
     def get_full_name(self):
         """Return the full name of the member"""
