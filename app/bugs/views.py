@@ -33,7 +33,7 @@ class BugDetailView(IsInProjectMixin, DetailView):
 
         context['isAdminOrSupervisor'] = (
             self.request.user.is_superuser or
-            self.request.user in self.object.supervisors.all()
+            self.request.user in self.object.project.supervisors.all()
         )
 
         context['status_class'] = {
