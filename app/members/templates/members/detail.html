@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+
+{% block title %}Member Detail{% endblock %}
+
+{% block content %}
+	<div class="d-flex flex-column h-100 pt-2">
+		<div>
+			<h1>{{ member.name }}</h1>
+		</div>
+
+		<div class="row mt-3 flex-grow-1">
+			<div class="col-md-8 mb-2">
+				<h3 class="text-center text-primary">Assigned Bugs</h3>
+				
+				{% if member.assigned_bugs.all %}
+					{% include 'bugs/bug_list_group.html' with bugs=member.assigned_bugs %}
+				{% else %}
+					<p>No bug assigned to this member.</p>
+				{% endif %}
+			</div>
+			
+			<div class="col-md">
+				<h3 class="text-center text-primary">Projects</h3>
+				
+				{% if member.projects.exists %}
+					<ul>
+						{% for project in member.projects.all %}
+							<li class="py-2">
+								<a class="text-dark text-decoration-none fs-4" href="{%url 'projects:detail' project.id %}">
+									{{ project.title }}
+								</a>
+							</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<p>This member is not part of any project.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	
+{% endblock %}
