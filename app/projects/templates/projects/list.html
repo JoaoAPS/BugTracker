@@ -3,14 +3,69 @@
 {% block title %}Projects{% endblock %}
 
 {% block content %}
-	<h1>Projects</h1>
+	<div class="d-flex align-items-center">
+		<h1 class="me-auto">Projects</h1>
+		
+		{% if request.user.is_superuser %}
+			<a href="{% url 'projects:create' %}" class="btn btn-success me-2">Create Project</a>
+		{% endif %}
+		
+		{% if request.GET.show_inactive %}
+			<a href="{% url 'projects:list' %}" class="btn btn-secondary">
+				Hide Inactives
+			</a>
+		{% else %}
+			<a href="{% url 'projects:list' %}?show_inactive=1" class="btn btn-outline-secondary">
+				Show Inactives
+			</a>
+		{% endif %}
+	</div>
+
 
 	{% if projects %}
-		<p>{{ projects|length }} active project{{ projects|pluralize }}.</p>
+		{% if request.GET.show_inactive %}
+			<small class="text-secondary">{{ projects|length }} project{{ projects|pluralize }}.</small>
+		{% else %}
+			<small class="text-secondary">{{ projects|length }} active project{{ projects|pluralize }}.</small>
+		{% endif %}
+
+		<div class="row mt-3">
+			<div class="col-md-8"><h4>Title</h4></div>
+			<div class="col-md"><h4>Supervisors</h4></div>
+		</div>
 		
-		<ul>
+		<ul class="list-group list-group-flush">
 		{% for project in projects %}
-			<li><a href="{% url 'projects:detail' project.id %}">{{ project.title }}</a></li>
+			<a href="{% url 'projects:detail' project.id %}" class="list-group-item list-group-item-action py-3 text-dark">
+				<div class="row">
+					
+					<div class="col-md-8">
+						{{ project.title }}
+						
+						{% if request.GET.show_inactive %}
+							{% if project.status == 'ON-GOING' %}	
+								- <span class="text-primary">{{ project.status|title }}</span>
+							{% elif project.status == 'PAUSED' %}	
+								- <span class="text-secondary">{{ project.status|title }}</span>
+							{% elif project.status == 'CLOSED' %}	
+								- <span class="text-danger">{{ project.status|title }}</span>
+							{% elif project.status == 'FINISHED' %}	
+								- <span class="text-success">{{ project.status|title }}</span>
+							{% endif %}
+						{% endif %}
+						
+					</div>
+					
+					<div class="col-md">
+						{% with project.supervisors.all as all_sup %}
+							{% for supervisor in all_sup %}
+								{% if supervisor != all_sup|first %},{% endif %}
+								{{ supervisor.get_short_name }}
+							{% endfor %}
+						{% endwith %}
+					</div>
+				</div>
+			</a>
 		{% endfor %}
 		</ul>
 	{% else %}

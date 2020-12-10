@@ -21,6 +21,15 @@ class ProjectListView(LoginRequiredMixin, ListView):
     context_object_name = 'projects'
     login_url = reverse_lazy('members:login')
 
+    def get_queryset(self):
+        """Return the list of projects applting filters"""
+        queryset = self.model.objects.all()
+
+        if not self.request.GET.get('show_inactive'):
+            queryset = queryset.filter(_status='ON-GOING')
+
+        return queryset
+
 
 class ProjectDetailView(IsInProjectMixin, DetailView):
     """View for displaying project details"""
