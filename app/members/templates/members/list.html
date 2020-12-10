@@ -3,7 +3,14 @@
 {% block title %}Team members{% endblock %}
 
 {% block content %}
-	<h1>Team members</h1>
+	<div class="d-flex align-items-center">
+		<h1 class="me-auto">Team members</h1>
+		
+		{% if request.user.is_superuser %}
+			<a href="{% url 'members:register' %}" class="btn btn-success">Register New Member</a>
+		{% endif %}
+	</div>
+	
 	{% if members %}
 		<small class="text-secondary">{{ members|length }} active member{{ projects|length|pluralize }} on the team.</small>
 	

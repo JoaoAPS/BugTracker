@@ -8,7 +8,7 @@
 			<h1>{% block name_title %}{{ member.name }}{% endblock %}</h1>
 			
 			{% if member.is_superuser %}
-				<span class="badge badge-sm bg-danger ms-3">Admin</span>
+				{% block admin_badge %}{% endblock %}
 			{% endif %}
 		</div>
 
