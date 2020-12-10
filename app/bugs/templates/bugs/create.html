@@ -1,15 +1,44 @@
 {% extends "core/base.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Report bug{% endblock %}
 
 {% block content %}
-	<h1>Report a new bug</h1>
+<h1>Report a new bug</h1>
 	
-	<form method="post">
+<div class="row">
+	<form class="form col-md-8 mt-3 offset-md-1" method="POST">
 		{% csrf_token %}
-		{{ form.as_p }}
 		
-		<br>
-		<button>Report Bug!</button>
+		{% for field in form %}
+			<div class="my-3">
+				{{ field.label }}
+				
+				{% if field.name != 'project'  %}
+				
+					{% if field.errors %}
+						{{ field|add_class:"form-control is-invalid" }}
+						<div class="invalid-feedback">{{ field.errors }}</div>
+					{% else %}
+						{{ field|add_class:"form-control" }}
+					{% endif %}
+				
+				{% else %}
+			
+					{% if field.errors %}
+						{{ field|add_class:"form-select is-invalid" }}
+						<div class="invalid-feedback">{{ field.errors }}</div>
+					{% else %}
+						{{ field|add_class:"form-select" }}
+					{% endif %}
+					
+				{% endif %}
+			</div>
+		{% endfor %}
+		
+		<div class="text-danger">{{ form.non_field_errors }}</div>
+		
+		<button class="btn btn-primary mt-3 mb-5">Report Bug</button>
 	</form>
+</div>
 {% endblock %}

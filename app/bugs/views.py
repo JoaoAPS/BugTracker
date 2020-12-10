@@ -76,6 +76,13 @@ class BugCreateView(LoginRequiredMixin, CreateView):
 
         return redirect(self.get_success_url())
 
+    def get_initial(self):
+        """Set the active project if supplied in GET param"""
+        project = self.request.GET.get('project')
+        if project:
+            return {'project': int(project)}
+        return {}
+
 
 class BugUpdateView(LoginRequiredMixin, UpdateView):
     """View for creating bugs"""

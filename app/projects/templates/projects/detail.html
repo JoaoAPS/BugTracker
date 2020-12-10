@@ -23,7 +23,7 @@
 			</div>
 			
 			{% if project.status == 'ON-GOING' %}
-				<a href="{% url 'bugs:create' %}" class="mt-4">
+				<a href="{% url 'bugs:create' %}?project={{ project.id }}" class="mt-4">
 					<button class="btn btn-success mt-4">Report Bug</button>
 				</a>
 			{% endif %}
