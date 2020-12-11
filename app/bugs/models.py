@@ -6,8 +6,10 @@ from projects.models import Project
 
 class Bug(models.Model):
     """A bug in a project to be fixed"""
-    POSSIBLE_STATUS = ['WAITING', 'BEING WORKED', 'FIXED', 'CLOSED']
+    POSSIBLE_STATUS = ['BEING WORKED', 'WAITING', 'FIXED', 'CLOSED']
     ACTIVE_STATUS = ['WAITING', 'BEING WORKED']
+    WORKING_STATUS = 'BEING WORKED'
+    WAITING_STATUS = 'WAITING'
     STATUS_CLASSES = {
         'WAITING': 'warning',
         'BEING WORKED': 'primary',

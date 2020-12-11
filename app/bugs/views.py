@@ -9,7 +9,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Bug
 from .forms import BugCreateForm, BugUpdateForm
-from core.mixins import IsInProjectMixin, IsSupervisorMixin
+from core.mixins import \
+    IsInProjectMixin, \
+    IsSupervisorMixin, \
+    IsSupervisorOrAssignedMixin
 from members.models import Member
 
 
@@ -125,6 +128,30 @@ class BugChangeStatusView(IsSupervisorMixin, View):
 
         try:
             bug.set_status(status)
+            bug.save()
+        except ValueError:
+            return HttpResponseBadRequest('Invalid status')
+
+        return redirect('bugs:detail', pk=pk)
+
+
+class BugChangeWorkingStatusView(IsSupervisorOrAssignedMixin, View):
+    """Change the status of the bug"""
+    model = Bug
+
+    def post(self, request, pk):
+        bug = get_object_or_404(Bug, pk=pk)
+        starting = request.POST.get('starting')
+
+        if starting is None:
+            return HttpResponseBadRequest(
+                'Value of starting must be sent in POST'
+            )
+
+        try:
+            bug.set_status(
+                bug.WORKING_STATUS if int(starting) else bug.WAITING_STATUS
+            )
             bug.save()
         except ValueError:
             return HttpResponseBadRequest('Invalid status')

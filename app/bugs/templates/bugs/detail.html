@@ -5,11 +5,27 @@
 {% block content %}
 	<div class="row">
 		<div class="col-md-9">
-			<div class="d-flex justify-content-between align-items-center">
-				<h1>{{ bug.title }}</h1>
+			<div class="d-flex align-items-center">
+				<h1 class="me-auto">{{ bug.title }}</h1>
+				
+				{% if bug.status in bug.ACTIVE_STATUS and request.user in bug.assigned_members.all %}
+					<form action="{% url 'bugs:change_working_status' bug.id %}" method="POST">
+						{% csrf_token %}
+						
+						{% if bug.status == bug.WORKING_STATUS %}
+							<input name="starting" type="text" class="d-none" value="0">
+							<button class="btn btn-secondary">Stop work</button>
+						{% else %}
+							<input name="starting" type="text" class="d-none" value="1">
+							<button class="btn btn-success">Work on bug</button>
+						{% endif %}
+						
+					</form>
+				{% endif %}
+				
 				{% if isAdminOrSupervisor %}
 					<a href="{% url 'bugs:update' bug.id %}">
-						<button class="btn btn-danger">Edit Bug</button>
+						<button class="btn btn-danger ms-1">Edit Bug</button>
 					</a>
 				{% endif %}
 			</div>
