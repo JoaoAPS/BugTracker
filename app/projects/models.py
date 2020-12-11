@@ -5,12 +5,12 @@ from members.models import Member
 
 class Project(models.Model):
     """A project worked on by members and containing bugs"""
-    POSSIBLE_STATUS = ['ON-GOING', 'CLOSED', 'FINISHED', 'PAUSED']
+    POSSIBLE_STATUS = ['ON-GOING', 'FINISHED', 'PAUSED', 'CLOSED']
     STATUS_CLASSES = {
         'ON-GOING': 'primary',
-        'CLOSED': 'danger',
         'FINISHED': 'success',
-        'PAUSED': 'secondary'
+        'PAUSED': 'secondary',
+        'CLOSED': 'danger',
     }
     ACTIVE_STATUS = ['ON-GOING']
 
@@ -40,6 +40,11 @@ class Project(models.Model):
             )
 
         self._status = status
+
+    @property
+    def status_tuples(self):
+        """A list of tuples containing the status and its bootstrap class"""
+        return [(s, self.STATUS_CLASSES[s]) for s in self.POSSIBLE_STATUS]
 
     @classmethod
     def get_active(cls):

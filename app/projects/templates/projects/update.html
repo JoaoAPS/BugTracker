@@ -1,17 +1,83 @@
 {% extends "core/base.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Edit project{% endblock %}
 
 {% block content %}
-	<h1>Edit project - {{ project.title }}</h1>
+
+<div class="d-flex align-items-center justify-content-between">
+	<h1>Edit: {{ project.title }}</h1>
+	<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#statusModal">
+		Change project status
+	</button>
+</div>
 	
-	<form method="post">
+<div class="row">
+	<form class="form col-md-8 mt-3 offset-md-1" method="POST">
 		{% csrf_token %}
-		{{ form.as_p }}
 		
-		<br>
-		<button>Update Project!</button>
+		{% for field in form %}
+			<div class="my-3">
+				{{ field.label }}
+				
+				{% if field.name != 'members'  %}
+				
+					{% if field.errors %}
+						{{ field|add_class:"form-control is-invalid" }}
+						<div class="invalid-feedback">{{ field.errors }}</div>
+					{% else %}
+						{{ field|add_class:"form-control" }}
+					{% endif %}
+				
+				{% else %}
+			
+					{% if field.errors %}
+						{{ field|add_class:"form-select is-invalid" }}
+						<div class="invalid-feedback">{{ field.errors }}</div>
+					{% else %}
+						{{ field|add_class:"form-select" }}
+					{% endif %}
+					
+				{% endif %}
+			</div>
+		{% endfor %}
+		
+		<div class="text-danger">{{ form.non_field_errors }}</div>
+		
+		<div class="mt-4 mb-5">
+			<button class="btn btn-primary">Update Project</button>
+			<a href="{% url 'projects:detail' project.id %}" class="btn btn-danger">Cancel</a>
+		</div>
 	</form>
-	
-	<button>Change project status</button>
+</div>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Change project status to:</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			
+			<div class="modal-body d-flex">
+				{% for status in project.status_tuples %}
+					{% if status.0 != project.status %}
+						<form action="{% url 'projects:change_status' project.id %}" method='POST'>
+							{% csrf_token %}
+							
+							<input name="status" type="text" class="d-none" value="{{ status.0 }}">
+					
+							<button class="btn btn-{{ status.1 }} me-1">
+								{{ status.0|title }}
+							</button>
+						</form>
+					{% endif %}
+				{% endfor %}
+				
+				<button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}

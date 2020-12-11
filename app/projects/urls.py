@@ -20,4 +20,9 @@ urlpatterns = [
         views.ProjectAddSupervisorView.as_view(),
         name='add_supervisor'
     ),
+    path(
+        '<int:pk>/change_status',
+        views.ProjectChangeStatusView.as_view(),
+        name='change_status'
+    ),
 ]

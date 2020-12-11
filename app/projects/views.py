@@ -118,3 +118,22 @@ class ProjectAddSupervisorView(IsSupervisorMixin, View):
             return HttpResponseBadRequest()
 
         return redirect('projects:detail', pk=pk)
+
+
+class ProjectChangeStatusView(IsSupervisorMixin, View):
+    """Change the status of the project"""
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        status = request.POST.get('status')
+
+        if not status:
+            return HttpResponseBadRequest('New status must be sent in POST')
+
+        try:
+            project.set_status(status)
+            project.save()
+        except ValueError:
+            return HttpResponseBadRequest('Invalid status')
+
+        return redirect('projects:detail', pk=pk)
