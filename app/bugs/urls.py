@@ -15,4 +15,9 @@ urlpatterns = [
         views.BugAssignMemberView.as_view(),
         name='assign_member'
     ),
+    path(
+        '<int:pk>/change_status',
+        views.BugChangeStatusView.as_view(),
+        name='change_status'
+    ),
 ]

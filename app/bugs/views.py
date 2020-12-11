@@ -111,3 +111,22 @@ class BugAssignMemberView(IsSupervisorMixin, View):
             return HttpResponseBadRequest()
 
         return redirect('bugs:detail', pk=pk)
+
+
+class BugChangeStatusView(IsSupervisorMixin, View):
+    """Change the status of the bug"""
+
+    def post(self, request, pk):
+        bug = get_object_or_404(Bug, pk=pk)
+        status = request.POST.get('status')
+
+        if not status:
+            return HttpResponseBadRequest('New status must be sent in POST')
+
+        try:
+            bug.set_status(status)
+            bug.save()
+        except ValueError:
+            return HttpResponseBadRequest('Invalid status')
+
+        return redirect('bugs:detail', pk=pk)

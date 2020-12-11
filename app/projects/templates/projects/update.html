@@ -6,7 +6,7 @@
 {% block content %}
 
 <div class="d-flex align-items-center justify-content-between">
-	<h1>Edit: {{ project.title }}</h1>
+	<h1>Edit project: {{ project.title }}</h1>
 	<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#statusModal">
 		Change project status
 	</button>
@@ -20,7 +20,7 @@
 			<div class="my-3">
 				{{ field.label }}
 				
-				{% if field.name != 'members'  %}
+				{% if field.name != 'members' %}
 				
 					{% if field.errors %}
 						{{ field|add_class:"form-control is-invalid" }}

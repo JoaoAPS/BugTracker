@@ -27,4 +27,5 @@ class BugUpdateForm(forms.ModelForm):
             'creationDate',
             'closingDate',
             'creator',
+            'project',
         ]
