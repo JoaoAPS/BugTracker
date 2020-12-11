@@ -36,7 +36,7 @@
 		
 		<div class="col-md d-flex flex-column">
 			<h4>Assigned Members:</h4>
-			{% if isAdminOrSupervisor and bug.status != 'FIXED' %}
+			{% if isAdminOrSupervisor and bug.status in bug.ACTIVE_STATUS %}
 				<button class="btn btn-danger align-self-center" data-bs-toggle="modal" data-bs-target="#assign-modal">
 					Assign a member
 				</button>

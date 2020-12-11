@@ -52,12 +52,9 @@ class ProjectDetailView(IsInProjectMixin, DetailView):
             self.request.user in self.object.supervisors.all()
         )
 
-        context['status_class'] = {
-            'ON-GOING': 'text-primary',
-            'CLOSED': 'text-danger',
-            'FINISHED': 'text-success',
-            'PAUSED': 'text-secondary'
-        }[self.object.status]
+        context['status_class'] = self.object.STATUS_CLASSES[
+            self.object.status
+        ]
 
         context['all_members'] = get_user_model().objects.all()
 

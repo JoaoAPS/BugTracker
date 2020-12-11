@@ -45,6 +45,11 @@ class Bug(models.Model):
 
         self._status = status
 
+    @property
+    def status_tuples(self):
+        """A list of tuples containing the status and its bootstrap class"""
+        return [(s, self.STATUS_CLASSES[s]) for s in self.POSSIBLE_STATUS]
+
     @classmethod
     def get_active(cls):
         """Return a queryset with the active bugs"""

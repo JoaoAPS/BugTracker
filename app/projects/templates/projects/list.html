@@ -43,17 +43,12 @@
 						{{ project.title }}
 						
 						{% if request.GET.show_inactive %}
-							{% if project.status == 'ON-GOING' %}	
-								- <span class="text-primary">{{ project.status|title }}</span>
-							{% elif project.status == 'PAUSED' %}	
-								- <span class="text-secondary">{{ project.status|title }}</span>
-							{% elif project.status == 'CLOSED' %}	
-								- <span class="text-danger">{{ project.status|title }}</span>
-							{% elif project.status == 'FINISHED' %}	
-								- <span class="text-success">{{ project.status|title }}</span>
-							{% endif %}
+							{% for status in project.status_tuples %}
+								{% if project.status == status.0 %}
+									- <span class="text-{{ status.1 }}">{{ project.status|title }}</span>
+								{% endif %}
+							{% endfor %}
 						{% endif %}
-						
 					</div>
 					
 					<div class="col-md">

@@ -14,7 +14,7 @@
 				{% endif %}
 			</div>
 			<small class="text-secondary">Status:</small>
-			<small class="{{ status_class }}">{{ project.status|title }}</small>
+			<small class="text-{{ status_class }}">{{ project.status|title }}</small>
 			
 			<div class="card bg-light border-0 mt-1">
 				<div class="card-body">
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 			
-			{% if project.status == 'ON-GOING' %}
+			{% if project.status in project.ACTIVE_STATUS %}
 				<a href="{% url 'bugs:create' %}?project={{ project.id }}" class="mt-4">
 					<button class="btn btn-success mt-4">Report Bug</button>
 				</a>
@@ -50,7 +50,7 @@
 		
 		<div class="col-md d-flex flex-column">
 			<h3>Supervisors:</h3>
-			{% if isAdminOrSupervisor and project.status == 'ON-GOING' %}
+			{% if isAdminOrSupervisor and project.status in project.ACTIVE_STATUS %}
 				<button class="btn btn-danger align-self-center" data-bs-toggle="modal" data-bs-target="#supervisor-modal">
 					Add Supervisor
 				</button>
@@ -72,7 +72,7 @@
 			
 			
 			<h3>Members:</h3>
-			{% if isAdminOrSupervisor and project.status == 'ON-GOING' %}
+			{% if isAdminOrSupervisor and project.status in project.ACTIVE_STATUS %}
 				<button class="btn btn-danger align-self-center" data-bs-toggle="modal" data-bs-target="#member-modal">
 					Add Member
 				</button>

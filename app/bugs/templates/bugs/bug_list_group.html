@@ -11,16 +11,11 @@
 			{% endif %}
 			
 			{% if show_status %}
-				-
-				{% if bug.status == 'WAITING' %}
-					<span class="text-warning">{{ bug.status|title }}</span>
-				{% elif bug.status == 'BEING WORKED' %}
-					<span class="text-primary">{{ bug.status|title }}</span>
-				{% elif bug.status == 'FIXED' %}
-					<span class="text-success">{{ bug.status|title }}</span>
-				{% elif bug.status == 'CLOSED' %}
-					<span class="text-danger">{{ bug.status|title }}</span>
-				{% endif %}
+				{% for status in bug.status_tuples %}
+					{% if bug.status == status.0 %}
+						- <span class="text-{{ status.1 }}">{{ bug.status|title }}</span>
+					{% endif %}
+				{% endfor %}
 			{% endif %}
 			
 			{% if show_assigned %}
