@@ -98,6 +98,16 @@ class BugUpdateView(LoginRequiredMixin, UpdateView):
         """Return the url to the current object detail page"""
         return reverse_lazy('bugs:detail', args=[self.object.id])
 
+    def get_form(self, form_class=None):
+        """Return a form with the correct queryset"""
+        if form_class is None:
+            form_class = self.get_form_class()
+
+        if self.object and self.object.project:
+            project_members = self.object.project.members.all()
+            return form_class(project_members, **self.get_form_kwargs())
+        return form_class(None, **self.get_form_kwargs())
+
 
 class BugAssignMemberView(IsSupervisorMixin, View):
     """Perform assignment of member to bug"""
