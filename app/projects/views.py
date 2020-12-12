@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.core.exceptions import SuspiciousOperation
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from django.views import View
 from django.views.generic.list import ListView
@@ -70,6 +71,29 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})
+
+    def get_form(self, form_class=None):
+        """Return a form with the correct queryset"""
+        if form_class is None:
+            form_class = self.get_form_class()
+
+        members_to_add = get_user_model().objects.filter(
+            ~Q(id=self.request.user.id)
+        )
+
+        return form_class(members_to_add, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        """Creates the project and sets the current user as supervisor"""
+        project = form.save()
+
+        project.members.add(self.request.user)
+        project.supervisors.add(self.request.user)
+        project.save()
+
+        self.object = project
+
+        return redirect(self.get_success_url())
 
 
 class ProjectUpdateView(IsSupervisorMixin, UpdateView):

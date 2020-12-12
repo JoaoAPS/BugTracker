@@ -4,6 +4,10 @@ from .models import Project
 
 
 class ProjectCreateForm(forms.ModelForm):
+    def __init__(self, member_options, *args, **kwargs):
+        super(ProjectCreateForm, self).__init__(*args, **kwargs)
+        self.fields['members'].queryset = member_options
+
     class Meta:
         model = Project
         exclude = ['_status', 'creationDate', 'closingDate', 'supervisors']
