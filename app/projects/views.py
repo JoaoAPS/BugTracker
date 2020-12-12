@@ -10,7 +10,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Project
-from .forms import ProjectCreateForm
+from .forms import ProjectCreateForm, ProjectUpdateForm
 from core.mixins import IsInProjectMixin, IsSupervisorMixin
 
 
@@ -75,12 +75,23 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 class ProjectUpdateView(IsSupervisorMixin, UpdateView):
     """View for creating new projects"""
     model = Project
-    form_class = ProjectCreateForm
+    form_class = ProjectUpdateForm
     template_name = 'projects/update.html'
     login_url = reverse_lazy('members:login')
 
     def get_success_url(self):
         return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})
+
+    def get_form(self, form_class=None):
+        """Return a form with the correct queryset"""
+        if form_class is None:
+            form_class = self.get_form_class()
+
+        if self.object:
+            project_members = self.object.members.all()
+            return form_class(project_members, **self.get_form_kwargs())
+
+        return form_class(None, **self.get_form_kwargs())
 
 
 class ProjectAddMemberView(IsSupervisorMixin, View):
