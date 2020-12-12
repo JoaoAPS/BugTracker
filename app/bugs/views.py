@@ -1,6 +1,7 @@
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
-from django.http.response import HttpResponseBadRequest
+from django.core.exceptions import SuspiciousOperation
+
 from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -115,13 +116,21 @@ class BugAssignMemberView(IsSupervisorMixin, View):
     def post(self, request, pk):
         bug = get_object_or_404(Bug, pk=pk)
 
+        member_ids = request.POST.getlist('member_ids')
+        if not member_ids:
+            raise SuspiciousOperation('Member id not sent!')
+        member_ids = [int(m_id) for m_id in member_ids]
+
         try:
-            member = Member.objects.get(id=request.POST['member_id'])
-            if member not in bug.project.members.all():
-                return HttpResponseBadRequest()
-            bug.assigned_members.add(member)
+            for member_id in member_ids:
+                member = Member.objects.get(id=member_id)
+                if member not in bug.project.members.all():
+                    return SuspiciousOperation(
+                        'Member must be part of bug project!'
+                    )
+                bug.assigned_members.add(member)
         except Member.DoesNotExist:
-            return HttpResponseBadRequest()
+            return SuspiciousOperation('Invalid member id!')
 
         return redirect('bugs:detail', pk=pk)
 
@@ -134,13 +143,13 @@ class BugChangeStatusView(IsSupervisorMixin, View):
         status = request.POST.get('status')
 
         if not status:
-            return HttpResponseBadRequest('New status must be sent in POST')
+            return SuspiciousOperation('New status must be sent in POST')
 
         try:
             bug.set_status(status)
             bug.save()
         except ValueError:
-            return HttpResponseBadRequest('Invalid status')
+            return SuspiciousOperation('Invalid status')
 
         return redirect('bugs:detail', pk=pk)
 
@@ -154,7 +163,7 @@ class BugChangeWorkingStatusView(IsSupervisorOrAssignedMixin, View):
         starting = request.POST.get('starting')
 
         if starting is None:
-            return HttpResponseBadRequest(
+            return SuspiciousOperation(
                 'Value of starting must be sent in POST'
             )
 
@@ -164,6 +173,6 @@ class BugChangeWorkingStatusView(IsSupervisorOrAssignedMixin, View):
             )
             bug.save()
         except ValueError:
-            return HttpResponseBadRequest('Invalid status')
+            return SuspiciousOperation('Invalid status')
 
         return redirect('bugs:detail', pk=pk)

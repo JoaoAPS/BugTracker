@@ -88,7 +88,7 @@
 	        <form id="assign_form" action="{% url 'bugs:assign_member' bug.id %}" method="POST">
 				{% csrf_token %}
 				
-				<select class="form-select" name="member_id">
+				<select multiple required class="form-select" name="member_ids">
 					{% for member in bug.project.members.all %}
 						{% if member not in bug.assigned_members.all %}
 							<option value="{{ member.id }}">{{ member.name }}</option>
@@ -99,7 +99,7 @@
 	      </div>
 	      
 	      <div class="modal-footer">
-	        <button type="button"  class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 	        <button type="submit" form="assign_form" class="btn btn-primary">Assign members</button>
 	      </div>
 	      
