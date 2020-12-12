@@ -95,6 +95,7 @@
 	</div>
 	
 	
+	<!-- Add Member Modal -->
 	<div class="modal" tabindex="-1" id="member-modal">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
@@ -108,7 +109,7 @@
 	        <form id="add_member_form" action="{% url 'projects:add_member' project.id %}" method="POST">
 				{% csrf_token %}
 				
-				<select class="form-select" name="member_id">
+				<select multiple class="form-select" name="member_ids">
 					{% for member in all_members.all %}
 						{% if member not in project.members.all %}
 							<option value="{{ member.id }}">{{ member.name }}</option>
@@ -127,6 +128,7 @@
 	  </div>
 	</div>
 	
+	<!-- Add Supervisor Modal -->
 	<div class="modal" tabindex="-1" id="supervisor-modal">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
@@ -140,7 +142,7 @@
 	        <form id="add_supervisor_form" action="{% url 'projects:add_supervisor' project.id %}" method="POST">
 				{% csrf_token %}
 				
-				<select class="form-select" name="supervisor_id">
+				<select multiple class="form-select" name="supervisor_ids">
 					{% for member in project.members.all %}
 						{% if member not in project.supervisors.all %}
 							<option value="{{ member.id }}">{{ member.name }}</option>

@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.http.response import HttpResponseBadRequest
+from django.core.exceptions import SuspiciousOperation
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 
@@ -88,13 +88,20 @@ class ProjectAddMemberView(IsSupervisorMixin, View):
 
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
+        member_ids = request.POST.getlist('member_ids')
         MemberModel = get_user_model()
 
+        if not member_ids:
+            raise SuspiciousOperation('Member ids must be passed!')
+
+        member_ids = [int(m_id) for m_id in member_ids]
+
         try:
-            member = MemberModel.objects.get(id=request.POST['member_id'])
-            project.members.add(member)
+            for member_id in member_ids:
+                member = MemberModel.objects.get(id=member_id)
+                project.members.add(member)
         except MemberModel.DoesNotExist:
-            return HttpResponseBadRequest()
+            raise SuspiciousOperation('Invalid member id!')
 
         return redirect('projects:detail', pk=pk)
 
@@ -104,15 +111,25 @@ class ProjectAddSupervisorView(IsSupervisorMixin, View):
 
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
+        supervisor_ids = request.POST.getlist('supervisor_ids')
         MemberModel = get_user_model()
 
+        if not supervisor_ids:
+            raise SuspiciousOperation('Member ids must be passed!')
+
+        supervisor_ids = [int(m_id) for m_id in supervisor_ids]
+
         try:
-            member = MemberModel.objects.get(id=request.POST['supervisor_id'])
-            if member not in project.members.all():
-                return HttpResponseBadRequest()
-            project.supervisors.add(member)
+            for supervisor_id in supervisor_ids:
+                member = MemberModel.objects.get(id=supervisor_id)
+                if member not in project.members.all():
+                    raise SuspiciousOperation(
+                        'Member must be in the project to be assigned \
+                        supervisor!'
+                    )
+                project.supervisors.add(member)
         except MemberModel.DoesNotExist:
-            return HttpResponseBadRequest()
+            raise SuspiciousOperation('Invalid member id!')
 
         return redirect('projects:detail', pk=pk)
 
@@ -125,12 +142,12 @@ class ProjectChangeStatusView(IsSupervisorMixin, View):
         status = request.POST.get('status')
 
         if not status:
-            return HttpResponseBadRequest('New status must be sent in POST')
+            raise SuspiciousOperation('New status must be sent in POST')
 
         try:
             project.set_status(status)
             project.save()
         except ValueError:
-            return HttpResponseBadRequest('Invalid status')
+            raise SuspiciousOperation('Invalid status')
 
         return redirect('projects:detail', pk=pk)

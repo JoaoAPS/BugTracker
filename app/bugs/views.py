@@ -125,7 +125,7 @@ class BugAssignMemberView(IsSupervisorMixin, View):
             for member_id in member_ids:
                 member = Member.objects.get(id=member_id)
                 if member not in bug.project.members.all():
-                    return SuspiciousOperation(
+                    raise SuspiciousOperation(
                         'Member must be part of bug project!'
                     )
                 bug.assigned_members.add(member)
@@ -143,13 +143,13 @@ class BugChangeStatusView(IsSupervisorMixin, View):
         status = request.POST.get('status')
 
         if not status:
-            return SuspiciousOperation('New status must be sent in POST')
+            raise SuspiciousOperation('New status must be sent in POST')
 
         try:
             bug.set_status(status)
             bug.save()
         except ValueError:
-            return SuspiciousOperation('Invalid status')
+            raise SuspiciousOperation('Invalid status')
 
         return redirect('bugs:detail', pk=pk)
 
@@ -163,7 +163,7 @@ class BugChangeWorkingStatusView(IsSupervisorOrAssignedMixin, View):
         starting = request.POST.get('starting')
 
         if starting is None:
-            return SuspiciousOperation(
+            raise SuspiciousOperation(
                 'Value of starting must be sent in POST'
             )
 
@@ -173,6 +173,6 @@ class BugChangeWorkingStatusView(IsSupervisorOrAssignedMixin, View):
             )
             bug.save()
         except ValueError:
-            return SuspiciousOperation('Invalid status')
+            raise SuspiciousOperation('Invalid status')
 
         return redirect('bugs:detail', pk=pk)
