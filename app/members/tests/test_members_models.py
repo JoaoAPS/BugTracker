@@ -114,3 +114,34 @@ class MemberModelNegativeTestes(TestCase):
                 name='User 2',
                 password='321'
             )
+
+
+class MemberMethodTests(TestCase):
+
+    def test_get_short_name(self):
+        """Test the get_short_name method"""
+        user1 = Member.objects.create_user(
+            name='John Doe',
+            email='user1@mail.com',
+            password='123'
+        )
+        user2 = Member.objects.create_user(
+            name='Valentina Johnson',
+            email='user2@mail.com',
+            password='123'
+        )
+        user3 = Member.objects.create_user(
+            name='Dr. Haha Junior',
+            email='user3@mail.com',
+            password='123'
+        )
+        user4 = Member.objects.create_user(
+            name='Superlongusername Last Name',
+            email='user4@mail.com',
+            password='123'
+        )
+
+        self.assertEqual(user1.get_short_name(), 'John Doe')
+        self.assertEqual(user2.get_short_name(), 'Valentina')
+        self.assertEqual(user3.get_short_name(), 'Dr. Haha')
+        self.assertEqual(user4.get_short_name(), 'Superlongusername')
