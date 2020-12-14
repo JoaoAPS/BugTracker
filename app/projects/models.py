@@ -17,8 +17,8 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     _status = models.CharField(max_length=10, default='ON-GOING')
-    creationDate = models.DateField(auto_now_add=True)
-    closingDate = models.DateField(null=True, blank=True, default=None)
+    creationDate = models.DateTimeField(auto_now_add=True)
+    closingDate = models.DateTimeField(null=True, blank=True, default=None)
 
     members = models.ManyToManyField(
         Member, related_name='projects', blank=True

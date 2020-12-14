@@ -20,8 +20,8 @@ class Bug(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     _status = models.CharField(max_length=15, default='WAITING')
-    creationDate = models.DateField(auto_now_add=True)
-    closingDate = models.DateField(null=True, blank=True, default=None)
+    creationDate = models.DateTimeField(auto_now_add=True)
+    closingDate = models.DateTimeField(null=True, blank=True, default=None)
 
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name='bugs'
