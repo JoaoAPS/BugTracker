@@ -23,12 +23,12 @@ class ProjectListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('members:login')
 
     def get_queryset(self):
-        """Return the list of projects applting filters"""
+        """Return the list of projects applting filters and ordering"""
         queryset = self.model.objects.all() \
             if self.request.GET.get('show_inactive') \
             else self.model.get_active()
 
-        return queryset
+        return queryset.order_by('-creationDate')
 
 
 class ProjectDetailView(IsInProjectMixin, DetailView):

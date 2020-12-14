@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Member
 from .forms import MemberCreateForm
-from core.mixins import IsSuperuserMixin, IsCurrentUserMixin
+from core.mixins import IsSuperuserMixin
 
 
 class MemberLoginView(LoginView):
@@ -28,6 +28,10 @@ class MemberListView(LoginRequiredMixin, ListView):
     template_name = 'members/list.html'
     context_object_name = 'members'
     login_url = reverse_lazy('members:login')
+
+    def get_queryset(self):
+        """Return the queryset after ordering"""
+        return self.model.objects.all().order_by('name')
 
 
 class MemberCreateView(IsSuperuserMixin, CreateView):
