@@ -30,7 +30,7 @@ class ProjectModelTests(TestCase):
         for st in self.project.status_tuples:
             self.assertEqual(Project.STATUS_CLASSES[st[0]], st[1])
 
-    def test_get_active(self):
+    def test_project_get_active(self):
         """Test the get_active class method"""
         Project.objects.create(title='Test2', _status='PAUSED')
         Project.objects.create(title='Test3', _status='CLOSED')

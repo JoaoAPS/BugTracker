@@ -20,7 +20,7 @@ class BugModelTests(TestCase):
         )
 
     def test_bug_status_enums(self):
-        """Test the status enums are set up correctly"""
+        """Test the bug status enums are set up correctly"""
         for active_status in Bug.ACTIVE_STATUS:
             self.assertIn(active_status, Bug.POSSIBLE_STATUS)
 
@@ -31,7 +31,7 @@ class BugModelTests(TestCase):
             self.assertIn(status, Bug.STATUS_CLASSES.keys())
 
     def test_bug_set_status(self):
-        """Test the set_status method"""
+        """Test the bug set_status method"""
         self.bug.set_status('FIXED')
         self.assertEqual(self.bug.status, 'FIXED')
 
@@ -39,12 +39,12 @@ class BugModelTests(TestCase):
             self.bug.set_status('NON_EXISTING_ENUM')
 
     def test_bug_status_tuples(self):
-        """Test the status_tuples property"""
+        """Test the bug status_tuples property"""
         for st in self.bug.status_tuples:
             self.assertEqual(Bug.STATUS_CLASSES[st[0]], st[1])
 
-    def test_get_active(self):
-        """Test the get_active class method"""
+    def test_bug_get_active(self):
+        """Test the bug get_active class method"""
         b1 = self.bug
         b2 = Bug.objects.create(
             title='Test2',
@@ -66,4 +66,4 @@ class BugModelTests(TestCase):
         )
         actives = Bug.get_active().order_by('title')
 
-        self.assertQuerysetEqual(set(actives), {str(b1), str(b2)})
+        self.assertQuerysetEqual(set(actives), [str(b1), str(b2)])
