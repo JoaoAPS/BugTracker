@@ -30,7 +30,7 @@ class Bug(models.Model):
         Member, on_delete=models.CASCADE, related_name='created_bugs'
     )
     assigned_members = models.ManyToManyField(
-        Member, related_name='assigned_bugs'
+        Member, related_name='assigned_bugs', blank=True
     )
 
     @property

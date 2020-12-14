@@ -21,10 +21,10 @@ class Project(models.Model):
     closingDate = models.DateField(null=True, blank=True, default=None)
 
     members = models.ManyToManyField(
-        Member, related_name='projects'
+        Member, related_name='projects', blank=True
     )
     supervisors = models.ManyToManyField(
-        Member, related_name='supervised_projects'
+        Member, related_name='supervised_projects', blank=True
     )
 
     @property
