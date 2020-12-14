@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import SuspiciousOperation
+from django.utils import timezone
 
 from django.views.generic import View
 from django.views.generic.list import ListView
@@ -153,7 +152,7 @@ class BugChangeStatusView(IsSupervisorMixin, View):
             raise SuspiciousOperation('Invalid status')
         else:
             if status not in bug.ACTIVE_STATUS:
-                bug.closingDate = datetime.now()
+                bug.closingDate = timezone.now()
             bug.save()
 
         return redirect('bugs:detail', pk=pk)
