@@ -1,6 +1,7 @@
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 
 from django.views.generic import View
@@ -72,9 +73,15 @@ class BugCreateView(LoginRequiredMixin, CreateView):
         if not self.request.user.is_authenticated:
             print("Bug creation of unauthenticated user denied!")
             return redirect(self.login_url)
-            return
 
         self.object = form.save(commit=False)
+
+        if not self.request.user.is_superuser and \
+                self.request.user not in self.object.project.members.all():
+            raise PermissionDenied(
+                "A member cannot create a bug on a project it is not part of!"
+            )
+
         self.object.creator = self.request.user
         self.object.save()
         form.save_m2m()
@@ -89,8 +96,8 @@ class BugCreateView(LoginRequiredMixin, CreateView):
         return {}
 
 
-class BugUpdateView(LoginRequiredMixin, UpdateView):
-    """View for creating bugs"""
+class BugUpdateView(IsSupervisorMixin, UpdateView):
+    """View for updating bugs"""
     model = Bug
     form_class = BugUpdateForm
     template_name = 'bugs/update.html'
@@ -113,6 +120,7 @@ class BugUpdateView(LoginRequiredMixin, UpdateView):
 
 class BugAssignMemberView(IsSupervisorMixin, View):
     """Perform assignment of member to bug"""
+    model = Bug
 
     def post(self, request, pk):
         bug = get_object_or_404(Bug, pk=pk)
@@ -138,6 +146,7 @@ class BugAssignMemberView(IsSupervisorMixin, View):
 
 class BugChangeStatusView(IsSupervisorMixin, View):
     """Change the status of the bug"""
+    model = Bug
 
     def post(self, request, pk):
         bug = get_object_or_404(Bug, pk=pk)
