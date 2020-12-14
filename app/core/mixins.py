@@ -11,6 +11,9 @@ class IsSuperuserMixin(UserPassesTestMixin):
     permission_denied_message = 'You must an admin to register a new member!'
 
     def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
         return self.request.user.is_superuser
 
 
@@ -19,6 +22,9 @@ class IsCurrentUserMixin(UserPassesTestMixin):
     login_url = reverse_lazy('members:login')
 
     def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
         return (
             self.request.user.is_superuser or
             self.request.user.id == self.kwargs['pk']
@@ -30,6 +36,9 @@ class IsInProjectMixin(UserPassesTestMixin):
     login_url = reverse_lazy('members:login')
 
     def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
         if self.request.user.is_superuser:
             return True
 
@@ -52,6 +61,9 @@ class IsSupervisorMixin(UserPassesTestMixin):
     login_url = reverse_lazy('members:login')
 
     def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
         if self.request.user.is_superuser:
             return True
 
@@ -76,6 +88,9 @@ class IsSupervisorOrAssignedMixin(UserPassesTestMixin):
     login_url = reverse_lazy('members:login')
 
     def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
         if self.model != Bug:
             print('IsSupervisorOrAssignedMixin should be used only on model \
                 views of bugs!')
