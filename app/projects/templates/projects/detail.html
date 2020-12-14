@@ -16,6 +16,10 @@
 			<small class="text-secondary">Status:</small>
 			<small class="text-{{ status_class }}">{{ project.status|title }}</small>
 			
+			{% if project.status not in project.ACTIVE_STATUS %}
+				<span class="text-secondary">- Closed on {{ project.closingDate|date:"d M Y" }}.</span>
+			{% endif %}
+			
 			<div class="card bg-light border-0 mt-1">
 				<div class="card-body">
 					{{ project.description|linebreaks }}

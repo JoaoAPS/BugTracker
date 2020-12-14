@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404, redirect
 from django.core.exceptions import SuspiciousOperation
 from django.urls import reverse_lazy
@@ -181,8 +183,11 @@ class ProjectChangeStatusView(IsSupervisorMixin, View):
 
         try:
             project.set_status(status)
-            project.save()
         except ValueError:
             raise SuspiciousOperation('Invalid status')
+        else:
+            if status not in project.ACTIVE_STATUS:
+                project.closingDate = datetime.now()
+            project.save()
 
         return redirect('projects:detail', pk=pk)

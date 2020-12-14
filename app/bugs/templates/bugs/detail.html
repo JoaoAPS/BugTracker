@@ -34,10 +34,16 @@
 			<a href="{% url 'projects:detail' bug.project.id %}" class="text-decoration-none">
 				{{ bug.project.title }}
 			</a>
-			<span class="text-secondary"> - Bug created in {{ bug.creationDate|date:"j M. Y" }} by </span>
-			<a href="{% url 'members:detail' bug.creator.id %}" class="text-decoration-none">
-				{{ bug.creator.name }}
-			</a><span class="text-secondary">.</span>
+			
+			{% if bug.status in bug.ACTIVE_STATUS %}
+				<span class="text-secondary"> - Bug created in {{ bug.creationDate|date:"j M. Y" }} by </span>
+				<a href="{% url 'members:detail' bug.creator.id %}" class="text-decoration-none">
+					{{ bug.creator.name }}
+				</a>
+				<span class="text-secondary">.</span>
+			{% else %}
+				<span class="text-secondary"> - Bug closed in {{ bug.closingDate|date:"j M. Y" }}.</span>
+			{% endif %}
 			
 			<br>
 			<small class="text-secondary">Status:</small>
