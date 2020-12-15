@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 
@@ -43,13 +44,16 @@ class IsInProjectMixin(UserPassesTestMixin):
             return True
 
         if self.model:
+            current_object = get_object_or_404(
+                self.model, pk=self.kwargs['pk']
+            )
+
             if self.model == Project:
-                project = self.model.objects.get(pk=self.kwargs['pk'])
-                return project in self.request.user.projects.all()
+                return current_object in self.request.user.projects.all()
 
             if self.model == Bug:
-                current_bug = Bug.objects.get(id=self.kwargs['pk'])
-                return current_bug.project in self.request.user.projects.all()
+                return current_object.project in \
+                    self.request.user.projects.all()
 
         print('IsInProjectMixin should be used only on models view of projects\
             and bugs!')
@@ -68,15 +72,16 @@ class IsSupervisorMixin(UserPassesTestMixin):
             return True
 
         if self.model:
+            current_object = get_object_or_404(
+                self.model, pk=self.kwargs['pk']
+            )
+            supervised_projs = self.request.user.supervised_projects.all()
+
             if self.model == Project:
-                supervised_projs = self.request.user.supervised_projects.all()
-                current_project = self.model.get(pk=self.kwargs['pk'])
-                return current_project in supervised_projs
+                return current_object in supervised_projs
 
             if self.model == Bug:
-                current_bug = Bug.objects.get(id=self.kwargs['pk'])
-                supervised_projs = self.request.user.supervised_projects.all()
-                return current_bug.project in supervised_projs
+                return current_object.project in supervised_projs
 
         print('IsSupervisorMixin should be used only on models views of \
             projects and bugs!')
@@ -99,7 +104,7 @@ class IsSupervisorOrAssignedMixin(UserPassesTestMixin):
         if self.request.user.is_superuser:
             return True
 
-        bug = Bug.objects.get(id=self.kwargs['pk'])
+        bug = get_object_or_404(Bug, pk=self.kwargs['pk'])
         supervised_projs = self.request.user.supervised_projects.all()
 
         return bug.project in supervised_projs or \

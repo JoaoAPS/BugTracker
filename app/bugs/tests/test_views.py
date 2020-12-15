@@ -269,3 +269,93 @@ class TestBugListView(TestCase):
             res.context['bugs'],
             [repr(bug) for bug in queryset],
         )
+
+
+class TestBugDetailView(TestCase):
+    """Test the bug detail view"""
+
+    def setUp(self):
+        self.superuser = utils.sample_superuser(email='super@mail.com')
+        self.supervisor = utils.sample_member(email='email1@mail.com')
+        self.creator = utils.sample_member(email='email2@mail.com')
+        self.assigned = utils.sample_member(email='email3@mail.com')
+        self.member = utils.sample_member(email='email4@mail.com')
+
+        self.project = utils.sample_project(creator=self.supervisor)
+        self.project.members.add(self.supervisor)
+        self.project.members.add(self.creator)
+        self.project.members.add(self.assigned)
+        self.project.members.add(self.member)
+        self.project.supervisors.add(self.supervisor)
+
+        self.bug = utils.sample_bug(creator=self.creator, project=self.project)
+        self.bug.assigned_members.add(self.assigned)
+
+        self.client = Client()
+        self.detail_url = reverse('bugs:detail', args=[self.bug.id])
+
+    def test_bug_detail_only_GET(self):
+        """Test only GET requests are allowed for the bug detail view"""
+        self.client.force_login(self.supervisor)
+
+        res = self.client.post(self.detail_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.patch(self.detail_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.put(self.detail_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.delete(self.detail_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_detail_404_on_nonexisting_bug(self):
+        """Test trying to access a non existing bug returns a 404"""
+        self.client.force_login(self.supervisor)
+
+        nonexisting_url = reverse('bugs:detail', args=[9876])
+        res = self.client.get(nonexisting_url)
+
+        self.assertEqual(res.status_code, 404)
+
+    def test_bug_detail_successful_request(self):
+        """Test a succesful request returns all necessary components"""
+        self.client.force_login(self.supervisor)
+        res = self.client.get(self.detail_url)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context['bug'], self.bug)
+        self.assertContains(res, self.bug.title)
+        self.assertContains(res, self.bug.description)
+        self.assertContains(res, str.title(self.bug.status))
+
+    def test_bug_detail_work_on_bug_button_for_assigned_only(self):
+        """Test the 'Work on bug' button only appears for assigned members"""
+        self.bug.set_status(self.bug.WAITING_STATUS)
+
+        self.client.force_login(self.assigned)
+        res = self.client.get(self.detail_url)
+        self.assertContains(res, 'Work on bug')
+
+        self.client.force_login(self.member)
+        res = self.client.get(self.detail_url)
+        self.assertNotContains(res, 'Work on bug')
+
+    def test_bug_detail_assign_member_button_for_supervisors_only(self):
+        """Test the 'Assign member' button only appears for supervisors"""
+        self.client.force_login(self.superuser)
+        res = self.client.get(self.detail_url)
+        self.assertContains(res, 'Assign a member')
+
+        self.client.force_login(self.supervisor)
+        res = self.client.get(self.detail_url)
+        self.assertContains(res, 'Assign a member')
+
+        self.client.force_login(self.assigned)
+        res = self.client.get(self.detail_url)
+        self.assertNotContains(res, 'Assign a member')
+
+        self.client.force_login(self.member)
+        res = self.client.get(self.detail_url)
+        self.assertNotContains(res, 'Assign a member')
