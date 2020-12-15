@@ -1,3 +1,5 @@
+import datetime
+
 from django.test import TestCase, Client
 from django.urls import reverse
 
@@ -207,6 +209,7 @@ class TestBugListView(TestCase):
         res = self.client.get(self.list_url)
 
         self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/list.html')
         self.assertFalse(res.context['bugs'].exists())
         self.assertContains(res, 'No bugs found')
 
@@ -235,6 +238,7 @@ class TestBugListView(TestCase):
         queryset = Bug.objects.filter(id__in=[b1.id, b2.id])
 
         self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/list.html')
         self.assertQuerysetEqual(
             res.context['bugs'],
             [repr(bug) for bug in queryset.order_by('-creationDate')]
@@ -265,6 +269,7 @@ class TestBugListView(TestCase):
         res = self.client.get(self.list_url + '?show_inactive=1')
 
         self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/list.html')
         self.assertQuerysetEqual(
             res.context['bugs'],
             [repr(bug) for bug in queryset],
@@ -325,6 +330,7 @@ class TestBugDetailView(TestCase):
         res = self.client.get(self.detail_url)
 
         self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/detail.html')
         self.assertEqual(res.context['bug'], self.bug)
         self.assertContains(res, self.bug.title)
         self.assertContains(res, self.bug.description)
@@ -359,3 +365,147 @@ class TestBugDetailView(TestCase):
         self.client.force_login(self.member)
         res = self.client.get(self.detail_url)
         self.assertNotContains(res, 'Assign a member')
+
+
+class TestBugCreateView(TestCase):
+    """Test the bug create view"""
+
+    def setUp(self):
+        self.member = utils.sample_member()
+        self.project = utils.sample_project(creator=self.member)
+        self.project.members.add(self.member)
+
+        self.client = Client()
+        self.client.force_login(self.member)
+        self.create_url = reverse('bugs:create')
+
+    def test_bug_create_view_GET_POST_PUT_only(self):
+        """Test only GET, POST and PUT requests are allowed to create view"""
+        res = self.client.patch(self.create_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.delete(self.create_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_create_view_GET_basic_successful(self):
+        """Test GETting create view with no optinal parameters"""
+        res = self.client.get(self.create_url)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/create.html')
+        self.assertContains(res, 'Title')
+        self.assertContains(res, 'Description')
+        self.assertContains(res, 'Project')
+
+    def test_bug_create_view_GET_default_project_successful(self):
+        """Test GETting create view with optinal parameters"""
+        res = self.client.get(self.create_url + f'?project={self.project.id}')
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/create.html')
+        self.assertContains(res, 'Title')
+        self.assertContains(res, 'Description')
+        self.assertContains(res, 'Project')
+
+    def test_bug_create_view_POST_successful(self):
+        """Test a bug is created when a valid request is made to create view"""
+        res = self.client.post(self.create_url, {
+            'title': 'Bug Title 123',
+            'description': 'A bug description',
+            'project': self.project.id
+        })
+
+        self.assertEqual(res.status_code, 302)
+        self.assertTrue(Bug.objects.filter(title='Bug Title 123').exists())
+
+    def test_bug_create_view_sets_creator_and_date_automatically(self):
+        """Test the bug creator and creation date are set automatically"""
+        res = self.client.post(self.create_url, {
+            'title': 'Bug Title 123',
+            'description': 'A bug description',
+            'project': self.project.id
+        })
+
+        self.assertEqual(res.status_code, 302)
+        bug = Bug.objects.get(title='Bug Title 123')
+
+        self.assertEqual(bug.creator, self.member)
+        self.assertEqual(bug.creationDate.date(), datetime.date.today())
+
+    def test_bug_create_view_missing_field(self):
+        """Test a missing required field returns an error"""
+        res = self.client.post(self.create_url, {
+            'description': 'A bug description',
+            'project': self.project.id
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(
+            Bug.objects.filter(description='A bug description').exists()
+        )
+
+        res = self.client.post(self.create_url, {
+            'title': 'Bug Title 456',
+            'description': 'A bug description',
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(
+            Bug.objects.filter(title='Bug Title 456').exists()
+        )
+
+    def test_bug_create_view_invalid_project(self):
+        """Test an invalid project returns an error"""
+        res = self.client.post(self.create_url, {
+            'title': 'Bug Title 456',
+            'description': 'A bug description',
+            'project': 123
+        })
+
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(
+            Bug.objects.filter(title='Bug Title 456').exists()
+        )
+
+
+class TestBugUpdateView(TestCase):
+    """Test the bug update view"""
+
+    def setUp(self):
+        self.member = utils.sample_member()
+        self.project = utils.sample_project(creator=self.member)
+        self.project.members.add(self.member)
+        self.project.supervisors.add(self.member)
+        self.bug = utils.sample_bug(creator=self.member, project=self.project)
+
+        self.client = Client()
+        self.client.force_login(self.member)
+        self.update_url = reverse('bugs:update', args=[self.bug.id])
+
+    def test_bug_update_view_no_DELETE(self):
+        """Test DELETE requests are not allowed to update view"""
+        res = self.client.delete(self.update_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_update_view_GET(self):
+        """Test GETting update view with no optinal parameters"""
+        res = self.client.get(self.update_url)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/update.html')
+
+        self.assertContains(res, 'Title')
+        self.assertContains(res, self.bug.title)
+
+        self.assertContains(res, 'Description')
+        self.assertContains(res, self.bug.description)
+
+    def test_bug_update_view_POST_successful(self):
+        """Test a bug is updated when a valid request is made to update view"""
+        res = self.client.post(self.update_url, {
+            'title': 'Bug Title 123',
+            'description': 'A bug description',
+        })
+        self.bug.refresh_from_db()
+
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(self.bug.title, 'Bug Title 123')
+        self.assertEqual(self.bug.description, 'A bug description')
