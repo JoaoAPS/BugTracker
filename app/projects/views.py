@@ -121,6 +121,7 @@ class ProjectUpdateView(IsSupervisorMixin, UpdateView):
 
 class ProjectAddMemberView(IsSupervisorMixin, View):
     """Add a member to the project"""
+    model = Project
 
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
@@ -144,6 +145,7 @@ class ProjectAddMemberView(IsSupervisorMixin, View):
 
 class ProjectAddSupervisorView(IsSupervisorMixin, View):
     """Add a supervisor to the project"""
+    model = Project
 
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
@@ -172,6 +174,7 @@ class ProjectAddSupervisorView(IsSupervisorMixin, View):
 
 class ProjectChangeStatusView(IsSupervisorMixin, View):
     """Change the status of the project"""
+    model = Project
 
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
