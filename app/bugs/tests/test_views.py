@@ -509,3 +509,199 @@ class TestBugUpdateView(TestCase):
         self.assertEqual(res.status_code, 302)
         self.assertEqual(self.bug.title, 'Bug Title 123')
         self.assertEqual(self.bug.description, 'A bug description')
+
+
+class TestBugAssignMemberView(TestCase):
+    """Test the bug AssignMember view"""
+
+    def setUp(self):
+        self.member = utils.sample_member(email='email1@mail.com')
+        self.supervisor = utils.sample_member(email='email2@mail.com')
+        self.project = utils.sample_project()
+        self.project.members.add(self.member)
+        self.project.members.add(self.supervisor)
+        self.project.supervisors.add(self.supervisor)
+        self.bug = utils.sample_bug(creator=self.member, project=self.project)
+
+        self.client = Client()
+        self.client.force_login(self.supervisor)
+
+        self.assign_member_url = reverse(
+            'bugs:assign_member', args=[self.bug.id]
+        )
+
+    def test_bug_assign_member_view_POST_only(self):
+        """Test the bug 'assign_member' view only accepts POST requests"""
+        res = self.client.get(self.assign_member_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.patch(self.assign_member_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.put(self.assign_member_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.delete(self.assign_member_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_assign_member_view_succeful(self):
+        """Test the bug 'assign_member' can successfully assign member"""
+        m1 = utils.sample_member(email='email3@mail.com')
+        m2 = utils.sample_member(email='email4@mail.com')
+
+        self.project.members.add(m1)
+        self.project.members.add(m2)
+
+        res1 = self.client.post(
+            self.assign_member_url, {'member_ids': [str(self.member.id)]}
+        )
+        res2 = self.client.post(
+            self.assign_member_url, {'member_ids': [m1.id, m2.id]}
+        )
+
+        self.assertEqual(res1.status_code, 302)
+        self.assertEqual(res2.status_code, 302)
+        self.assertIn(self.member, self.bug.assigned_members.all())
+        self.assertIn(m1, self.bug.assigned_members.all())
+        self.assertIn(m2, self.bug.assigned_members.all())
+
+    def test_bug_assign_member_view_errors(self):
+        """Test the bug 'assign_member' view raises errors when needed"""
+        non_project_member = utils.sample_member(email='nproject@mail.com')
+
+        res = self.client.post(self.assign_member_url)
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(self.bug.assigned_members.exists())
+
+        res = self.client.post(self.assign_member_url, {'member_ids': 1})
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(self.bug.assigned_members.exists())
+
+        res = self.client.post(self.assign_member_url, {'member_ids': [2165]})
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(self.bug.assigned_members.exists())
+
+        res = self.client.post(
+            self.assign_member_url, {'member_ids': non_project_member.id}
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(self.bug.assigned_members.exists())
+
+
+class TestBugChangeStatusView(TestCase):
+    """Test the bug ChangeStatus view"""
+
+    def setUp(self):
+        self.supervisor = utils.sample_member(email='email2@mail.com')
+        self.project = utils.sample_project()
+        self.project.members.add(self.supervisor)
+        self.project.supervisors.add(self.supervisor)
+        self.bug = utils.sample_bug(
+            creator=self.supervisor, project=self.project
+        )
+        self.bug.set_status(self.bug.WAITING_STATUS)
+
+        self.client = Client()
+        self.client.force_login(self.supervisor)
+
+        self.change_status_url = reverse(
+            'bugs:change_status', args=[self.bug.id]
+        )
+
+    def test_bug_change_status_view_POST_only(self):
+        """Test the bug 'change_status' view accepts only POST requests"""
+        res = self.client.get(self.change_status_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.patch(self.change_status_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.put(self.change_status_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.delete(self.change_status_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_change_status_view_successful(self):
+        """Test the bug 'change_status' view succesfully changes bug status"""
+        res = self.client.post(self.change_status_url, {'status': 'FIXED'})
+        self.bug.refresh_from_db()
+
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(self.bug.status, 'FIXED')
+        self.assertEqual(self.bug.closingDate.date(), datetime.date.today())
+
+    def test_bug_change_status_view_error(self):
+        """Test the bug 'change_status' view raises errors when needed"""
+        res = self.client.post(self.change_status_url)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
+        res = self.client.post(
+            self.change_status_url, {'status': 'nonexistent_status'}
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
+        res = self.client.post(self.change_status_url)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
+        res = self.client.post(self.change_status_url)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
+
+class TestBugChangeWorkingStatusView(TestCase):
+    """Test the bug ChangeWorkingStatus view"""
+
+    def setUp(self):
+        self.supervisor = utils.sample_member(email='email2@mail.com')
+        self.project = utils.sample_project()
+        self.project.members.add(self.supervisor)
+        self.project.supervisors.add(self.supervisor)
+        self.bug = utils.sample_bug(
+            creator=self.supervisor, project=self.project
+        )
+        self.bug.set_status(self.bug.WAITING_STATUS)
+
+        self.client = Client()
+        self.client.force_login(self.supervisor)
+
+        self.change_working_status_url = reverse(
+            'bugs:change_working_status', args=[self.bug.id]
+        )
+
+    def test_bug_change_working_status_view_POST_only(self):
+        """Test bug 'change_working_status' view accepts only POST requests"""
+        res = self.client.get(self.change_working_status_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.patch(self.change_working_status_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.put(self.change_working_status_url)
+        self.assertEqual(res.status_code, 405)
+
+        res = self.client.delete(self.change_working_status_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_change_working_status_view_successful(self):
+        """Test bug 'change_working_status' view succesfully changes status"""
+        res = self.client.post(self.change_working_status_url, {'starting': 1})
+        self.bug.refresh_from_db()
+
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(self.bug.status, self.bug.WORKING_STATUS)
+
+        res = self.client.post(self.change_working_status_url, {'starting': 0})
+        self.bug.refresh_from_db()
+
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
+    def test_bug_change_working_status_view_error(self):
+        """Test bug 'change_working_status' view raises errors when needed"""
+        res = self.client.post(self.change_working_status_url)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)

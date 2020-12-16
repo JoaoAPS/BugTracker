@@ -139,7 +139,7 @@ class BugAssignMemberView(IsSupervisorMixin, View):
                     )
                 bug.assigned_members.add(member)
         except Member.DoesNotExist:
-            return SuspiciousOperation('Invalid member id!')
+            raise SuspiciousOperation('Invalid member id!')
 
         return redirect('bugs:detail', pk=pk)
 
