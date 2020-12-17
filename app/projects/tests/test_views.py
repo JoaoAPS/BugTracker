@@ -427,3 +427,111 @@ def test_project_update_view_POST_invalid_payload(
 
     assert res.status_code == 200
     assert updated_project == project
+
+
+# ----------- AddMember View Tests -----------
+def test_project_add_member_view_successful(
+    django_user_model, supervisor_client, project_add_member_url, project
+):
+    """Test project add_member view successfully adds members to project"""
+    m0 = mixer.blend(django_user_model)
+    m1 = mixer.blend(django_user_model)
+    m2 = mixer.blend(django_user_model)
+    project.members.add(m0)
+
+    payload = {'member_ids': [m1.id, m2.id]}
+    res = supervisor_client.post(project_add_member_url, payload)
+    project.refresh_from_db()
+
+    assert res.status_code == 302
+    assert m0 in project.members.all()
+    assert m1 in project.members.all()
+    assert m2 in project.members.all()
+
+
+@pytest.mark.parametrize('payload', [
+    {},
+    {'member_ids': 0},
+    {'member_ids': [123]},
+    {'member_ids': 'string'},
+    {'member_ids': ['string']},
+])
+def test_project_add_member_view_invalid_payload(
+    supervisor_client, project_add_member_url, project, payload
+):
+    """Test project add_member view handles invalid payload correctly"""
+    res = supervisor_client.post(project_add_member_url, payload)
+    updated_project = Project.objects.get(id=project.id)
+
+    assert res.status_code == 400
+    assert list(updated_project.members.all()) == list(project.members.all())
+
+
+# ----------- AddSupervisor View Tests -----------
+def test_project_add_supervisor_view_successful(
+    django_user_model, supervisor_client, project_add_supervisor_url, project
+):
+    """Test project add_supervisor view successfully adds supervisors"""
+    m0 = mixer.blend(django_user_model)
+    m1 = mixer.blend(django_user_model)
+    project.members.add(m0)
+    project.members.add(m1)
+    project.supervisors.add(m0)
+
+    payload = {'supervisor_ids': [m1.id]}
+    res = supervisor_client.post(project_add_supervisor_url, payload)
+    project.refresh_from_db()
+
+    assert res.status_code == 302
+    assert m0 in project.supervisors.all()
+    assert m1 in project.supervisors.all()
+
+
+@pytest.mark.parametrize('payload', [
+    {},
+    {'supervisor_ids': 0},
+    {'supervisor_ids': [123]},
+    {'supervisor_ids': 'string'},
+    {'supervisor_ids': ['string']},
+])
+def test_project_add_supervisor_view_invalid_payload(
+    supervisor_client, project_add_supervisor_url, project, payload
+):
+    """Test project add_supervisor view handles invalid payload correctly"""
+    res = supervisor_client.post(project_add_supervisor_url, payload)
+    updated_project = Project.objects.get(id=project.id)
+
+    assert res.status_code == 400
+    assert list(updated_project.supervisors.all()) == \
+        list(project.supervisors.all())
+
+
+# ----------- ChangeStatus View Tests -----------
+@pytest.mark.parametrize(
+    'status', ['ON-GOING', 'FINISHED', 'PAUSED', 'CLOSED']
+)
+def test_project_change_status_view_successful(
+    supervisor_client, project_change_status_url, project, status
+):
+    """Test project change_status view succesfully changes status"""
+    res = supervisor_client.post(project_change_status_url, {'status': status})
+    project.refresh_from_db()
+
+    assert res.status_code == 302
+    assert project.status == status
+
+
+@pytest.mark.parametrize('payload', [
+    {},
+    {'status': 2},
+    {'status': 'wrong status'},
+])
+def test_project_change_status_view_invalid_payload(
+    supervisor_client, project_change_status_url, project, payload
+):
+    """Test project change_status handles invalid payload correctly"""
+    res = supervisor_client.post(project_change_status_url, payload)
+    updated_project = Project.objects.get(id=project.id)
+
+    assert res.status_code == 400
+    assert updated_project.status == project.status

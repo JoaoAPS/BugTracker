@@ -129,15 +129,15 @@ class ProjectAddMemberView(IsSupervisorMixin, View):
         MemberModel = get_user_model()
 
         if not member_ids:
-            raise SuspiciousOperation('Member ids must be passed!')
-
-        member_ids = [int(m_id) for m_id in member_ids]
+            raise SuspiciousOperation('member_ids must be passed!')
 
         try:
+            member_ids = [int(m_id) for m_id in member_ids]
+
             for member_id in member_ids:
                 member = MemberModel.objects.get(id=member_id)
                 project.members.add(member)
-        except MemberModel.DoesNotExist:
+        except (MemberModel.DoesNotExist, ValueError):
             raise SuspiciousOperation('Invalid member id!')
 
         return redirect('projects:detail', pk=pk)
@@ -153,11 +153,11 @@ class ProjectAddSupervisorView(IsSupervisorMixin, View):
         MemberModel = get_user_model()
 
         if not supervisor_ids:
-            raise SuspiciousOperation('Member ids must be passed!')
-
-        supervisor_ids = [int(m_id) for m_id in supervisor_ids]
+            raise SuspiciousOperation('supervisors_ids must be passed!')
 
         try:
+            supervisor_ids = [int(m_id) for m_id in supervisor_ids]
+
             for supervisor_id in supervisor_ids:
                 member = MemberModel.objects.get(id=supervisor_id)
                 if member not in project.members.all():
@@ -166,7 +166,7 @@ class ProjectAddSupervisorView(IsSupervisorMixin, View):
                         supervisor!'
                     )
                 project.supervisors.add(member)
-        except MemberModel.DoesNotExist:
+        except (MemberModel.DoesNotExist, ValueError):
             raise SuspiciousOperation('Invalid member id!')
 
         return redirect('projects:detail', pk=pk)
