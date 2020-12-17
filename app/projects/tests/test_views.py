@@ -2,6 +2,7 @@ import pytest
 from pytest_django.asserts import \
     assertRedirects, assertTemplateUsed, assertContains, assertNotContains
 from mixer.backend.django import mixer
+import datetime
 
 from django.urls import reverse
 
@@ -273,3 +274,80 @@ def test_project_detail_supervisor_buttons(
     assertNotContains(res, project_update_url)
     assertNotContains(res, project_add_member_url)
     assertNotContains(res, project_add_supervisor_url)
+
+
+# ----------- Detail View Tests -----------
+def test_project_create_view_GET(member_client, project_create_url):
+    """Test successfully GETting project create view with form"""
+    res = member_client.get(project_create_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'projects/create.html')
+
+    assertContains(res, 'Title')
+    assertContains(res, 'Description')
+    assertContains(res, 'Members')
+
+
+def test_project_create_view_POST(
+    django_user_model, member_client, project_create_url
+):
+    """Test a project is created when a valid request is made to create view"""
+    m1 = mixer.blend(django_user_model)
+    m2 = mixer.blend(django_user_model)
+
+    payload = {
+        'title': 'Test Project 142',
+        'description': 'A descriptione',
+        'members': [m1.id, m2.id]
+    }
+    res = member_client.post(project_create_url, payload)
+    payload.pop('members')
+
+    assert res.status_code == 302
+    project = Project.objects.filter(**payload)
+    assert project.exists()
+    assert m1 in project[0].members.all()
+    assert m2 in project[0].members.all()
+
+
+def test_project_create_view_sets_fields_automatically(
+    client, member, project_create_url
+):
+    """Test creationDate is set and creator is set as supervisor and member"""
+    payload = {'title': 'Test Project 142'}
+
+    client.force_login(member)
+    res = client.post(project_create_url, payload)
+
+    assert res.status_code == 302
+    project = Project.objects.get(**payload)
+
+    assert member in project.members.all()
+    assert member in project.supervisors.all()
+    assert project.creationDate.date() == datetime.date.today()
+
+
+def test_project_create_invalid_payload(
+    member_client, project_create_url
+):
+    """Test project create view does not create project if invalid payload"""
+    assert not Project.objects.exists()
+
+    res = member_client.post(project_create_url)
+    assert res.status_code == 200
+    assert not Project.objects.exists()
+
+    res = member_client.post(project_create_url, {'description': 'Something'})
+    assert res.status_code == 200
+    assert not Project.objects.exists()
+
+    res = member_client.post(project_create_url, {'title': ''})
+    assert res.status_code == 200
+    assert not Project.objects.exists()
+
+    res = member_client.post(
+        project_create_url, {'title': 'Title', 'members': [126478]}
+    )
+    assert res.status_code == 200
+    assert not Project.objects.exists()
