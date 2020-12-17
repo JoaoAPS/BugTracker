@@ -276,7 +276,7 @@ def test_project_detail_supervisor_buttons(
     assertNotContains(res, project_add_supervisor_url)
 
 
-# ----------- Detail View Tests -----------
+# ----------- Create View Tests -----------
 def test_project_create_view_GET(member_client, project_create_url):
     """Test successfully GETting project create view with form"""
     res = member_client.get(project_create_url)
@@ -289,7 +289,7 @@ def test_project_create_view_GET(member_client, project_create_url):
     assertContains(res, 'Members')
 
 
-def test_project_create_view_POST(
+def test_project_create_view_POST_successful(
     django_user_model, member_client, project_create_url
 ):
     """Test a project is created when a valid request is made to create view"""
@@ -351,3 +351,79 @@ def test_project_create_invalid_payload(
     )
     assert res.status_code == 200
     assert not Project.objects.exists()
+
+
+# ----------- Update View Tests -----------
+def test_project_update_view_GET(
+    supervisor_client, project, project_update_url, project_change_status_url
+):
+    """Test GETting project update view with no optinal parameters"""
+    res = supervisor_client.get(project_update_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'projects/update.html')
+
+    assertContains(res, 'Title')
+    assertContains(res, project.title)
+
+    assertContains(res, 'Description')
+    assertContains(res, project.description)
+
+    assertContains(res, 'Members')
+    assertContains(res, 'Supervisors')
+
+    assertContains(res, project_change_status_url)
+
+
+def test_project_update_view_POST_successful(
+    django_user_model,
+    supervisor_client,
+    project,
+    project_update_url,
+):
+    """Test POSTing project update view with correct payload"""
+    m1 = mixer.blend(django_user_model)
+    m2 = mixer.blend(django_user_model)
+    project.members.add(m1)
+
+    payload = {
+        'title': 'New Title',
+        'description': 'New description',
+        'members': [m1.id, m2.id],
+        'supervisors': [m1.id]
+    }
+    res = supervisor_client.post(project_update_url, payload)
+
+    project.refresh_from_db()
+    members = django_user_model.objects.filter(
+        id__in=payload['members']
+    ).order_by('id')
+    supervisors = django_user_model.objects.filter(
+        id__in=payload['supervisors']
+    ).order_by('id')
+
+    assert res.status_code == 302
+    assert project.title == payload['title']
+    assert project.description == payload['description']
+    assert list(project.members.order_by('id')) == list(members)
+    assert list(project.supervisors.order_by('id')) == list(supervisors)
+
+
+@pytest.mark.parametrize('payload', [
+    {'title': ''},
+    {'members': [12425]},
+    {'supervisors': [12425]},
+])
+def test_project_update_view_POST_invalid_payload(
+    django_user_model,
+    supervisor_client,
+    project,
+    project_update_url,
+    payload
+):
+    """Test an invalid payload to project update view doesn't update project"""
+    res = supervisor_client.post(project_update_url, payload)
+    updated_project = Project.objects.get(id=project.id)
+
+    assert res.status_code == 200
+    assert updated_project == project
