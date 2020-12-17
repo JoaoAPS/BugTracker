@@ -1,6 +1,6 @@
 import pytest
 from pytest_django.asserts import \
-    assertRedirects, assertTemplateUsed, assertContains
+    assertRedirects, assertTemplateUsed, assertContains, assertNotContains
 from mixer.backend.django import mixer
 
 from django.urls import reverse
@@ -199,6 +199,8 @@ def test_project_list_view_basic(
 
     assert res.status_code == 200
     assertTemplateUsed(res, 'projects/list.html')
+    assertContains(res, project_create_url)
+
     assert context_projects.count() == 2
     assert p1 in context_projects
     assert p2 in context_projects
@@ -217,3 +219,57 @@ def test_project_list_view_show_inactive(supervisor_client, project_list_url):
     assert res.status_code == 200
     assertTemplateUsed(res, 'projects/list.html')
     assert context_projects.count() == 4
+
+
+# ----------- Detail View Tests -----------
+def test_project_detail_404_on_inexistent_project(
+    supervisor_client
+):
+    """Test project detail view raises 404 when requested inexistent project"""
+    url = reverse('projects:detail', args=[124214])
+    res = supervisor_client.get(url)
+    assert res.status_code == 404
+
+
+def test_project_detail_successful_request(
+    supervisor_client, project_detail_url, project
+):
+    """Test a successful request on the project detail view"""
+    res = supervisor_client.get(project_detail_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'projects/detail.html')
+    assert res.context['project'] == project
+
+    assertContains(res, project.title)
+    assertContains(res, project.description.replace('\n', '<br>'))
+    assertContains(res, str.title(project.status))
+    assertContains(res, reverse('bugs:create'))
+
+
+def test_project_detail_supervisor_buttons(
+    superuser_client,
+    supervisor_client,
+    client,
+    project_member,
+    project_detail_url,
+    project_update_url,
+    project_add_member_url,
+    project_add_supervisor_url,
+):
+    res = superuser_client.get(project_detail_url)
+
+    assertContains(res, project_update_url)
+    assertContains(res, project_add_member_url)
+    assertContains(res, project_add_supervisor_url)
+
+    res = supervisor_client.get(project_detail_url)
+    assertContains(res, project_update_url)
+    assertContains(res, project_add_member_url)
+    assertContains(res, project_add_supervisor_url)
+
+    client.force_login(project_member)
+    res = client.get(project_detail_url)
+    assertNotContains(res, project_update_url)
+    assertNotContains(res, project_add_member_url)
+    assertNotContains(res, project_add_supervisor_url)
