@@ -14,13 +14,6 @@ def superuser(django_user_model):
 
 
 @pytest.fixture
-def superuser_client(client, superuser):
-    """A client with a superuser logged in"""
-    client.force_login(superuser)
-    return client
-
-
-@pytest.fixture
 def member(django_user_model):
     """A user that is not a member of any project"""
     return mixer.blend(django_user_model)
@@ -45,3 +38,24 @@ def project(supervisor, project_member):
     project.members.add(supervisor)
     project.supervisors.add(supervisor)
     return project
+
+
+@pytest.fixture
+def superuser_client(client, superuser):
+    """A client with a superuser logged in"""
+    client.force_login(superuser)
+    return client
+
+
+@pytest.fixture
+def supervisor_client(client, supervisor):
+    """A client with a supervisor logged in"""
+    client.force_login(supervisor)
+    return client
+
+
+@pytest.fixture
+def member_client(client, member):
+    """A client with a member logged in"""
+    client.force_login(member)
+    return client

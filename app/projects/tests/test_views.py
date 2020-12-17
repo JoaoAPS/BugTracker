@@ -1,7 +1,11 @@
 import pytest
-from pytest_django.asserts import assertRedirects
+from pytest_django.asserts import \
+    assertRedirects, assertTemplateUsed, assertContains
+from mixer.backend.django import mixer
 
 from django.urls import reverse
+
+from projects.models import Project
 
 
 # ----------- Permission Tests -----------
@@ -127,3 +131,89 @@ def test_project_views_non_project_member_permissions(
         assert res.status_code in [200, 400]
     else:
         assert res.status_code == 403
+
+
+@pytest.mark.parametrize('url_name,allowed_methods', [
+    ('project_list_url', ['GET']),
+    ('project_detail_url', ['GET']),
+    ('project_create_url', ['GET', 'POST', 'PUT']),
+    ('project_update_url', ['GET', 'POST', 'PUT']),
+    ('project_add_member_url', ['POST']),
+    ('project_add_supervisor_url', ['POST']),
+    ('project_change_status_url', ['POST']),
+])
+def test_project_views_allowed_methods(
+    superuser_client,
+    project_url_names_to_fixtures,
+    url_name,
+    allowed_methods
+):
+    """Test the project views only allow the assigned methods"""
+    url = project_url_names_to_fixtures[url_name]
+
+    res = superuser_client.get(url)
+    was_allowed = res.status_code != 405
+    assert was_allowed == ('GET' in allowed_methods)
+
+    res = superuser_client.post(url)
+    was_allowed = res.status_code != 405
+    assert was_allowed == ('POST' in allowed_methods)
+
+    res = superuser_client.put(url)
+    was_allowed = res.status_code != 405
+    assert was_allowed == ('PUT' in allowed_methods)
+
+    res = superuser_client.patch(url)
+    was_allowed = res.status_code != 405
+    assert was_allowed == ('PATCH' in allowed_methods)
+
+    res = superuser_client.delete(url)
+    was_allowed = res.status_code != 405
+    assert was_allowed == ('DELETE' in allowed_methods)
+
+
+# ----------- List View Tests -----------
+def test_project_list_view_empty_list(supervisor_client, project_list_url):
+    """Test the project list view when there are not projects created"""
+    assert not Project.objects.exists()
+
+    res = supervisor_client.get(project_list_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'projects/list.html')
+    assert not res.context['projects'].exists()
+    assertContains(res, 'No projects found')
+
+
+def test_project_list_view_basic(
+    supervisor_client, project_list_url, project_create_url
+):
+    """Test the project list view for a basic request"""
+    p1 = mixer.blend(Project)
+    p2 = mixer.blend(Project)
+    mixer.blend(Project, _status='CLOSED')
+    mixer.blend(Project, _status='FINISHED')
+
+    res = supervisor_client.get(project_list_url)
+    context_projects = res.context['projects']
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'projects/list.html')
+    assert context_projects.count() == 2
+    assert p1 in context_projects
+    assert p2 in context_projects
+
+
+def test_project_list_view_show_inactive(supervisor_client, project_list_url):
+    """Test the project list view shows inactive projects when asked"""
+    mixer.blend(Project)
+    mixer.blend(Project)
+    mixer.blend(Project, _status='CLOSED')
+    mixer.blend(Project, _status='FINISHED')
+
+    res = supervisor_client.get(project_list_url + '?show_inactive=1')
+    context_projects = res.context['projects']
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'projects/list.html')
+    assert context_projects.count() == 4

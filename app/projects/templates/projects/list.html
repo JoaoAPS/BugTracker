@@ -6,9 +6,7 @@
 	<div class="d-flex align-items-center">
 		<h1 class="me-auto">Projects</h1>
 		
-		{% if request.user.is_superuser %}
-			<a href="{% url 'projects:create' %}" class="btn btn-success me-2">Create Project</a>
-		{% endif %}
+		<a href="{% url 'projects:create' %}" class="btn btn-success me-2">Create Project</a>
 		
 		{% if request.GET.show_inactive %}
 			<a href="{% url 'projects:list' %}" class="btn btn-secondary">
