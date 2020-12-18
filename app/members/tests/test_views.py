@@ -150,3 +150,121 @@ def test_member_list_view_show_register_link_when_admin(
     client.force_login(superuser)
     res = client.get(member_list_url)
     assertContains(res, member_register_url)
+
+
+# ----------- Detail View Tests -----------
+def test_member_detail_404_on_inexistent_member(supervisor_client):
+    """Test member detail view raises 404 when requested inexistent member"""
+    url = reverse('members:detail', args=[124214])
+    res = supervisor_client.get(url)
+    assert res.status_code == 404
+
+
+def test_member_detail_successful_request(
+    supervisor_client, member_detail_url, member
+):
+    """Test a successful request on the member detail view"""
+    res = supervisor_client.get(member_detail_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'members/detail.html')
+    assert res.context['member'] == member
+    assertContains(res, member.name)
+
+
+# ----------- Register View Tests -----------
+def test_member_register_view_GET(superuser_client, member_register_url):
+    """Test successfully GETting member register view with form"""
+    res = superuser_client.get(member_register_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'registration/register.html')
+
+    assertContains(res, 'Name')
+    assertContains(res, 'Email')
+    assertContains(res, 'Password')
+
+
+def test_member_register_view_POST_successful(
+    django_user_model, superuser_client, member_register_url
+):
+    """Test a member is registered when a valid request is made"""
+    payload = {
+        'name': 'Test Member',
+        'email': 'test@mail.com',
+        'password': 'passsss',
+        'password2': 'passsss',
+    }
+    res = superuser_client.post(member_register_url, payload)
+
+    assert res.status_code == 302
+    member = django_user_model.objects.filter(email=payload['email'])
+    assert member.exists()
+    assert member[0].check_password(payload['password'])
+
+
+@pytest.mark.parametrize('payload', [
+    {},
+    {
+        'name': 'Name',
+        'password': 'A_valid_pass',
+        'password2': 'A_valid_pass',
+    },
+    {
+        'email': 'name@mail.com',
+        'password': 'A_valid_pass',
+        'password2': 'A_valid_pass',
+    },
+    {
+        'name': 'Name',
+        'email': 'name@mail.com',
+        'password2': 'A_valid_pass',
+    },
+    {
+        'name': 'Name',
+        'email': 'name@mail.com',
+        'password': 'A_valid_pass',
+    },
+    {
+        'name': '',
+        'email': 'name@mail.com',
+        'password': 'A_valid_pass',
+        'password2': 'A_valid_pass',
+    },
+    {
+        'name': 'Name',
+        'email': '',
+        'password': 'A_valid_pass',
+        'password2': 'A_valid_pass',
+    },
+    {
+        'name': 'Name',
+        'email': 'name@mail.com',
+        'password': '',
+        'password2': '',
+    },
+    {
+        'name': 'Name',
+        'email': 'not_a_mail.com',
+        'password': 'A_valid_pass',
+        'password2': 'A_valid_pass',
+    },
+    {
+        'name': 'Name',
+        'email': 'name@mail.com',
+        'password': 'A_valid_pass',
+        'password2': 'Wrong_password2',
+    },
+])
+def test_member_register_invalid_payload(
+    django_user_model, superuser_client, member_register_url, payload
+):
+    """Test member register view does not register member if invalid payload"""
+    num_member_before = django_user_model.objects.count()
+
+    res = superuser_client.post(member_register_url, payload)
+    payload.pop('password', None)
+    payload.pop('password2', None)
+
+    assert res.status_code == 200
+    assert num_member_before == django_user_model.objects.count()

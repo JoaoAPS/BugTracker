@@ -223,9 +223,7 @@ def test_project_list_view_show_inactive(supervisor_client, project_list_url):
 
 
 # ----------- Detail View Tests -----------
-def test_project_detail_404_on_inexistent_project(
-    supervisor_client
-):
+def test_project_detail_404_on_inexistent_project(supervisor_client):
     """Test project detail view raises 404 when requested inexistent project"""
     url = reverse('projects:detail', args=[124214])
     res = supervisor_client.get(url)
