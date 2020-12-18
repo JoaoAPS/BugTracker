@@ -5,8 +5,6 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.decorators.http import require_POST
-from django.utils.decorators import method_decorator
 
 from .models import Member
 from .forms import MemberCreateForm
@@ -22,10 +20,6 @@ class MemberLogoutView(LoginRequiredMixin, LogoutView):
     """View for logging out users"""
     next_page = '/'
     login_url = reverse_lazy('members:login')
-
-    @method_decorator(require_POST)
-    def dispatch(self, *args, **kwargs):
-        return super(MemberLogoutView, self).dispatch(*args, **kwargs)
 
 
 class MemberListView(LoginRequiredMixin, ListView):

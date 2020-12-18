@@ -1,7 +1,7 @@
 import pytest
 from pytest_django.asserts import \
-    assertRedirects  # , assertTemplateUsed, assertContains, assertNotContains
-# from mixer.backend.django import mixer
+    assertRedirects, assertTemplateUsed, assertContains, assertNotContains
+from mixer.backend.django import mixer
 
 from django.urls import reverse
 
@@ -83,7 +83,7 @@ def test_member_views_member_permissions(
     ('member_profile_url', ['GET']),
     ('member_register_url', ['GET', 'POST', 'PUT']),
     ('member_login_url', ['GET', 'POST', 'PUT']),
-    ('member_logout_url', ['POST']),
+    ('member_logout_url', ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
 ])
 def test_member_views_allowed_methods(
     superuser_client,
@@ -113,3 +113,40 @@ def test_member_views_allowed_methods(
     res = superuser_client.delete(url)
     was_allowed = res.status_code != 405
     assert was_allowed == ('DELETE' in allowed_methods)
+
+
+# ----------- List View Tests -----------
+def test_member_list_view_basic(
+    django_user_model,
+    member_client,
+    member,
+    member_list_url,
+):
+    """Test the member list view for a basic request"""
+    mixer.blend(django_user_model)
+    mixer.blend(django_user_model)
+
+    res = member_client.get(member_list_url)
+    context_members = res.context['members'].order_by('id')
+    database_members = django_user_model.objects.all().order_by('id')
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'members/list.html')
+    assert list(context_members) == list(database_members)
+
+
+def test_member_list_view_show_register_link_when_admin(
+    client,
+    member,
+    superuser,
+    member_list_url,
+    member_register_url,
+):
+    """Test member list view shows link to registration if admin request"""
+    client.force_login(member)
+    res = client.get(member_list_url)
+    assertNotContains(res, member_register_url)
+
+    client.force_login(superuser)
+    res = client.get(member_list_url)
+    assertContains(res, member_register_url)
