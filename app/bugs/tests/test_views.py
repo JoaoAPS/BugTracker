@@ -14,14 +14,19 @@ class TestBugViewsPermissions(TestCase):
         self.client = Client()
 
         self.member = utils.sample_member()
+        self.creator = utils.sample_member(email="other@mail.com")
         self.superuser = utils.sample_superuser()
         self.project = utils.sample_project()
-        self.bug = utils.sample_bug(creator=self.member, project=self.project)
+        self.project.members.add(self.creator)
+        self.bug = utils.sample_bug(creator=self.creator, project=self.project)
 
         self.list_url = reverse('bugs:list')
         self.detail_url = reverse('bugs:detail', args=[self.bug.id])
         self.create_url = reverse('bugs:create')
         self.update_url = reverse('bugs:update', args=[self.bug.id])
+        self.creator_update_url = reverse(
+            'bugs:creator_update', args=[self.bug.id]
+        )
         self.assign_member_url = reverse(
             'bugs:assign_member', args=[self.bug.id]
         )
@@ -41,6 +46,7 @@ class TestBugViewsPermissions(TestCase):
             self.detail_url,
             self.create_url,
             self.update_url,
+            self.creator_update_url,
         ]:
             res = self.client.get(url)
             redirect_url = res.url.split('?')[0]
@@ -51,6 +57,7 @@ class TestBugViewsPermissions(TestCase):
         for url in [
             self.create_url,
             self.update_url,
+            self.creator_update_url,
             self.assign_member_url,
             self.change_status_url,
             self.change_working_status_url,
@@ -70,6 +77,7 @@ class TestBugViewsPermissions(TestCase):
             self.detail_url,
             self.create_url,
             self.update_url,
+            self.creator_update_url,
         ]:
             res = self.client.get(url)
             self.assertEqual(res.status_code, 200)
@@ -77,6 +85,7 @@ class TestBugViewsPermissions(TestCase):
         for url in [
             self.create_url,
             self.update_url,
+            self.creator_update_url,
             self.assign_member_url,
             self.change_status_url,
             self.change_working_status_url,
@@ -126,10 +135,16 @@ class TestBugViewsPermissions(TestCase):
         res = self.client.get(self.update_url)
         self.assertEqual(res.status_code, 403)
 
+        res = self.client.get(self.creator_update_url)
+        self.assertEqual(res.status_code, 403)
+
         res = self.client.post(self.create_url)
         self.assertNotIn(res.status_code, [404, 403, 302])
 
         res = self.client.post(self.update_url)
+        self.assertEqual(res.status_code, 403)
+
+        res = self.client.post(self.creator_update_url)
         self.assertEqual(res.status_code, 403)
 
         res = self.client.post(self.assign_member_url)
@@ -157,10 +172,16 @@ class TestBugViewsPermissions(TestCase):
         res = self.client.get(self.update_url)
         self.assertEqual(res.status_code, 403)
 
+        res = self.client.get(self.creator_update_url)
+        self.assertEqual(res.status_code, 403)
+
         res = self.client.post(self.create_url, self.bugPayload)
         self.assertEqual(res.status_code, 403)
 
         res = self.client.post(self.update_url)
+        self.assertEqual(res.status_code, 403)
+
+        res = self.client.post(self.creator_update_url)
         self.assertEqual(res.status_code, 403)
 
         res = self.client.post(self.assign_member_url)
@@ -499,6 +520,58 @@ class TestBugUpdateView(TestCase):
         self.assertContains(res, self.bug.description)
 
     def test_bug_update_view_POST_successful(self):
+        """Test a bug is updated when a valid request is made to update view"""
+        res = self.client.post(self.update_url, {
+            'title': 'Bug Title 123',
+            'description': 'A bug description',
+        })
+        self.bug.refresh_from_db()
+
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(self.bug.title, 'Bug Title 123')
+        self.assertEqual(self.bug.description, 'A bug description')
+
+
+class TestBugCreatorUpdateView(TestCase):
+    """Test the bug creator_update view"""
+
+    def setUp(self):
+        self.creator = utils.sample_member()
+        self.project = utils.sample_project()
+        self.project.members.add(self.creator)
+        self.bug = utils.sample_bug(creator=self.creator, project=self.project)
+
+        self.client = Client()
+        self.client.force_login(self.creator)
+        self.update_url = reverse('bugs:creator_update', args=[self.bug.id])
+
+    def test_bug_creator_update_view_creator_allowed(self):
+        """Test the bug creator can access the creator_update view"""
+        res = self.client.get(self.update_url)
+        self.assertEqual(res.status_code, 200)
+
+        res = self.client.post(self.update_url)
+        self.assertNotEqual(res.status_code, 403)
+
+    def test_bug_creator_update_view_no_DELETE(self):
+        """Test DELETE requests are not allowed to update view"""
+        res = self.client.delete(self.update_url)
+        self.assertEqual(res.status_code, 405)
+
+    def test_bug_creator_update_view_GET(self):
+        """Test GETting update view with no optinal parameters"""
+        res = self.client.get(self.update_url)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, 'bugs/creator_update.html')
+
+        self.assertContains(res, 'Title')
+        self.assertContains(res, self.bug.title)
+
+        self.assertContains(res, 'Description')
+        self.assertContains(res, self.bug.description)
+
+    def test_bug_creator_update_view_POST_successful(self):
         """Test a bug is updated when a valid request is made to update view"""
         res = self.client.post(self.update_url, {
             'title': 'Bug Title 123',

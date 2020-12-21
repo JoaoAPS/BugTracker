@@ -11,6 +11,11 @@ urlpatterns = [
     path('create', views.BugCreateView.as_view(), name='create'),
     path('<int:pk>/edit', views.BugUpdateView.as_view(), name='update'),
     path(
+        '<int:pk>/edit_info',
+        views.BugCreatorUpdateView.as_view(),
+        name='creator_update'
+    ),
+    path(
         '<int:pk>/assign_member',
         views.BugAssignMemberView.as_view(),
         name='assign_member'

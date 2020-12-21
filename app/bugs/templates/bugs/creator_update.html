@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Report bug{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between">
+	<h1>Edit bug: {{ bug.title }}</h1>
+</div>
+	
+<div class="row">
+	<form class="form col-md-8 mt-3 offset-md-1" method="POST">
+		{% csrf_token %}
+		
+		{% for field in form %}
+			<div class="my-3">
+				{{ field.label }}
+				
+				{% if field.errors %}
+					{{ field|add_class:"form-control is-invalid" }}
+					<div class="invalid-feedback">{{ field.errors }}</div>
+				{% else %}
+					{{ field|add_class:"form-control" }}
+				{% endif %}
+			</div>
+		{% endfor %}
+		
+		<div class="text-danger">{{ form.non_field_errors }}</div>
+		
+		<div class="mt-4 mb-5">
+			<button class="btn btn-primary">Update Bug</button>
+			<a href="{% url 'bugs:detail' bug.id %}" class="btn btn-danger">Cancel</a>
+		</div>
+	</form>
+</div>
+
+{% endblock %}

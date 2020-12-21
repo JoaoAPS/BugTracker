@@ -11,11 +11,12 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Bug
-from .forms import BugCreateForm, BugUpdateForm
+from .forms import BugCreateForm, BugUpdateForm, BugCreatorUpdateForm
 from core.mixins import \
     IsInProjectMixin, \
     IsSupervisorMixin, \
-    IsSupervisorOrAssignedMixin
+    IsSupervisorOrAssignedMixin, \
+    IsCreatorMixin
 from members.models import Member
 
 
@@ -116,6 +117,18 @@ class BugUpdateView(IsSupervisorMixin, UpdateView):
             project_members = self.object.project.members.all()
             return form_class(project_members, **self.get_form_kwargs())
         return form_class(None, **self.get_form_kwargs())
+
+
+class BugCreatorUpdateView(IsCreatorMixin, UpdateView):
+    """View for updating bugs"""
+    model = Bug
+    form_class = BugCreatorUpdateForm
+    template_name = 'bugs/creator_update.html'
+    login_url = reverse_lazy('members:login')
+
+    def get_success_url(self):
+        """Return the url to the current object detail page"""
+        return reverse_lazy('bugs:detail', args=[self.object.id])
 
 
 class BugAssignMemberView(IsSupervisorMixin, View):

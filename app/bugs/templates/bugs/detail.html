@@ -27,6 +27,10 @@
 					<a href="{% url 'bugs:update' bug.id %}">
 						<button class="btn btn-danger ms-1">Edit Bug</button>
 					</a>
+				{% elif request.user == bug.creator %}
+					<a href="{% url 'bugs:creator_update' bug.id %}" class="btn btn-danger ms-1">
+						Edit Bug
+					</a>
 				{% endif %}
 			</div>
 			

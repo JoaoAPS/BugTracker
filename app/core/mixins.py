@@ -109,3 +109,22 @@ class IsSupervisorOrAssignedMixin(UserPassesTestMixin):
 
         return bug.project in supervised_projs or \
             self.request.user in bug.assigned_members.all()
+
+
+class IsCreatorMixin(UserPassesTestMixin):
+    """Mixin that only allows to view if user is the creator of the bug"""
+    login_url = reverse_lazy('members:login')
+
+    def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
+        if self.model != Bug:
+            print('IsCreatorMixin should be used only on model views of bugs!')
+            return False
+
+        if self.request.user.is_superuser:
+            return True
+
+        bug = get_object_or_404(Bug, pk=self.kwargs['pk'])
+        return bug.creator == self.request.user

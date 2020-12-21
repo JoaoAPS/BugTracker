@@ -33,3 +33,11 @@ class BugUpdateForm(forms.ModelForm):
             'creator',
             'project',
         ]
+
+
+class BugCreatorUpdateForm(forms.ModelForm):
+    """Form for updating a Bug object's title and description"""
+
+    class Meta:
+        model = Bug
+        fields = ['title', 'description']
