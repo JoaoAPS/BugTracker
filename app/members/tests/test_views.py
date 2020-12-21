@@ -268,3 +268,18 @@ def test_member_register_invalid_payload(
 
     assert res.status_code == 200
     assert num_member_before == django_user_model.objects.count()
+
+
+# ----------- Profile View Tests -----------
+def test_member_profile_successful_request(
+    django_user_model, client, member_profile_url
+):
+    """Test a successful request on the member profile view"""
+    member = mixer.blend(django_user_model)
+    client.force_login(member)
+    res = client.get(member_profile_url)
+
+    assert res.status_code == 200
+    assertTemplateUsed(res, 'members/profile.html')
+    assert res.context['member'] == member
+    assertContains(res, member.get_short_name())
