@@ -1,6 +1,6 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-from members.models import Member
 from projects.models import Project
 
 
@@ -27,10 +27,10 @@ class Bug(models.Model):
         Project, on_delete=models.CASCADE, related_name='bugs'
     )
     creator = models.ForeignKey(
-        Member, on_delete=models.CASCADE, related_name='created_bugs'
+        get_user_model(), on_delete=models.CASCADE, related_name='created_bugs'
     )
     assigned_members = models.ManyToManyField(
-        Member, related_name='assigned_bugs', blank=True
+        get_user_model(), related_name='assigned_bugs', blank=True
     )
 
     @property
@@ -60,5 +60,28 @@ class Bug(models.Model):
     def __str__(self):
         """Return the string representation of the bug object"""
         return self.title
+
+    __repr__ = __str__
+
+
+class Message(models.Model):
+    """A message written on the bug board"""
+
+    writer = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name='messages'
+    )
+    bug = models.ForeignKey(
+        Bug, on_delete=models.CASCADE, related_name='messages'
+    )
+    creationDate = models.DateTimeField(auto_now_add=True)
+    content = models.TextField()
+
+    def __str__(self):
+        """Return the string representation of the message object"""
+        result = self.writer.get_short_name() + ' - ' + self.message
+        if len(result) > 32:
+            result = result[:30] + '...'
+
+        return result
 
     __repr__ = __str__

@@ -5,6 +5,7 @@
 {% block content %}
 	<div class="row">
 		<div class="col-md-9">
+			<!-- Header -->
 			<div class="d-flex align-items-center">
 				<h1 class="me-auto">{{ bug.title }}</h1>
 				
@@ -34,6 +35,7 @@
 				{% endif %}
 			</div>
 			
+			<!-- Info -->
 			<span class="text-secondary">Project:</span>
 			<a href="{% url 'projects:detail' bug.project.id %}" class="text-decoration-none">
 				{{ bug.project.title }}
@@ -58,8 +60,36 @@
 					{{ bug.description|linebreaks }}
 				</div>
 			</div>
+			
+			<!-- Messages -->
+			<h2 class="mt-4">Messages</h2>
+			
+			<form action="{% url 'bugs:create_message' bug.id %}" method="POST">
+				{% csrf_token %}
+				<textarea class="form-control" name="content"></textarea>
+				<button class="btn btn-success btn-sm ms-1 mt-1">Send message</button>
+			</form>
+			
+			{% if messages.all %}
+				{% for message in messages.all %}
+					<div class="card bg-light border-0 mt-2">
+						<small class="card-title text-muted">
+							<a href="{% url 'members:detail' message.writer.id %}" class="text-decoration-none">
+								{{ message.writer }}
+							</a>
+							wrote on {{ message.creationDate|date:"H:i - j M. Y" }}
+						</small>
+						<div class="card-body">
+							{{ message.content|linebreaks }}
+						</div>
+					</div>
+				{% endfor %}
+			{% else %}
+				No messages yet.
+			{% endif %}
 		</div>
 		
+		<!-- Side bar -->
 		<div class="col-md d-flex flex-column">
 			<h4>Assigned Members:</h4>
 			{% if isAdminOrSupervisor and bug.status in bug.ACTIVE_STATUS %}
@@ -85,6 +115,7 @@
 	</div>	
 
 
+	<!-- Assign member modal -->
 	<div class="modal" tabindex="-1" id="assign-modal">
 	  <div class="modal-dialog">
 	    <div class="modal-content">

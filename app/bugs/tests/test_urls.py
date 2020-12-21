@@ -48,3 +48,13 @@ class BugsUrlTests(SimpleTestCase):
         url = reverse('bugs:change_working_status', args=[1])
         urlViewClass = resolve(url).func.view_class
         self.assertEqual(urlViewClass, views.BugChangeWorkingStatusView)
+
+
+class MessagesUrlTests(SimpleTestCase):
+    """The the message related urls are correctly set up"""
+
+    def test_message_create_url(self):
+        """Test the message create url"""
+        url = reverse('bugs:create_message', args=[1])
+        urlViewClass = resolve(url).func.view_class
+        self.assertEqual(urlViewClass, views.MessageCreateView)

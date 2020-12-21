@@ -30,4 +30,9 @@ urlpatterns = [
         views.BugChangeWorkingStatusView.as_view(),
         name='change_working_status'
     ),
+    path(
+        '<int:pk>/create_message',
+        views.MessageCreateView.as_view(),
+        name='create_message'
+    ),
 ]

@@ -10,7 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Bug
+from .models import Bug, Message
 from .forms import BugCreateForm, BugUpdateForm, BugCreatorUpdateForm
 from core.mixins import \
     IsInProjectMixin, \
@@ -54,6 +54,8 @@ class BugDetailView(IsInProjectMixin, DetailView):
         context['status_class'] = 'text-' + self.object.STATUS_CLASSES[
             self.object.status
         ]
+
+        context['messages'] = self.object.messages.order_by('-creationDate')
 
         return context
 
@@ -200,5 +202,30 @@ class BugChangeWorkingStatusView(IsSupervisorOrAssignedMixin, View):
             bug.save()
         except ValueError:
             raise SuspiciousOperation('Invalid status')
+
+        return redirect('bugs:detail', pk=pk)
+
+
+class MessageCreateView(IsInProjectMixin, View):
+    """Creates a new message for the bug board"""
+    model = Bug
+
+    def post(self, request, pk):
+        bug = get_object_or_404(Bug, pk=pk)
+
+        content = request.POST.get('content', None)
+        if not content:
+            raise SuspiciousOperation('Invalid message text!')
+
+        try:
+            content = str(content)
+        except (TypeError, ValueError):
+            raise SuspiciousOperation('Invalid message text!')
+        else:
+            Message.objects.create(
+                content=content,
+                writer=request.user,
+                bug=bug
+            )
 
         return redirect('bugs:detail', pk=pk)

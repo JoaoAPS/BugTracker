@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from core import utils
-from bugs.models import Bug
+from bugs.models import Bug, Message
 
 
 class TestBugViewsPermissions(TestCase):
@@ -386,6 +386,38 @@ class TestBugDetailView(TestCase):
         self.client.force_login(self.member)
         res = self.client.get(self.detail_url)
         self.assertNotContains(res, 'Assign a member')
+
+    def test_bug_detail_messages(self):
+        """Test the bug messages are correctly passed to context"""
+        self.client.force_login(self.member)
+        other_bug = utils.sample_bug(
+            creator=self.supervisor, project=self.project
+        )
+
+        Message.objects.create(
+            content="Mess 5", bug=self.bug, writer=self.member
+        )
+        Message.objects.create(
+            content="Mess 2", bug=self.bug, writer=self.member
+        )
+        Message.objects.create(
+            content="Mess 1", bug=self.bug, writer=self.superuser
+        )
+        Message.objects.create(
+            content="Mess 4", bug=self.bug, writer=self.supervisor
+        )
+        Message.objects.create(
+            content="Mess 14", bug=other_bug, writer=self.member
+        )
+        Message.objects.create(
+            content="Mess 13", bug=other_bug, writer=self.member
+        )
+        messages = Message.objects\
+            .filter(bug=self.bug).order_by('-creationDate')
+
+        res = self.client.get(self.detail_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(list(res.context['messages']), list(messages))
 
 
 class TestBugCreateView(TestCase):
@@ -778,3 +810,86 @@ class TestBugChangeWorkingStatusView(TestCase):
         res = self.client.post(self.change_working_status_url)
         self.assertEqual(res.status_code, 400)
         self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
+
+class TestMessageViews(TestCase):
+    """Test the views involving bug messages"""
+
+    def setUp(self):
+        self.superuser = utils.sample_superuser()
+        self.supervisor = utils.sample_member(email="visor@mail.com")
+        self.member = utils.sample_member()
+        self.non_member = utils.sample_member(email="oither@mail.com")
+        self.project = utils.sample_project(creator=self.supervisor)
+        self.project.members.add(self.member)
+        self.project.members.add(self.supervisor)
+        self.project.supervisors.add(self.supervisor)
+        self.bug = utils.sample_bug(
+            creator=self.superuser, project=self.project
+        )
+
+        self.client = Client()
+        self.message_create_url = reverse(
+            'bugs:create_message', args=[self.bug.id]
+        )
+
+    def test_message_create_view_only_POST_allowed(self):
+        """Test the message create view only accepts POST requests"""
+        self.client.force_login(self.superuser)
+
+        res = self.client.post(self.message_create_url)
+        self.assertNotEqual(res.status_code, 405)
+
+        for method in ['get', 'put', 'patch', 'delete']:
+            res = getattr(self.client, method)(self.message_create_url)
+            self.assertEqual(res.status_code, 405)
+
+    def test_message_create_view_permissions(self):
+        """Test the permission for the create_message view are correct"""
+        res = self.client.post(self.message_create_url)
+        self.assertRedirects(
+            res,
+            reverse('members:login') +
+                f'?next=/bugs/{self.bug.id}/create_message'
+        )
+
+        self.client.force_login(self.non_member)
+        res = self.client.post(self.message_create_url)
+        self.assertEqual(res.status_code, 403)
+
+        self.client.force_login(self.member)
+        res = self.client.post(self.message_create_url)
+        self.assertNotEqual(res.status_code, 403)
+
+        self.client.force_login(self.supervisor)
+        res = self.client.post(self.message_create_url)
+        self.assertNotEqual(res.status_code, 403)
+
+        self.client.force_login(self.superuser)
+        res = self.client.post(self.message_create_url)
+        self.assertNotEqual(res.status_code, 403)
+
+    def test_message_create_view_successful(self):
+        """Test the message create view automatically sets fields correctly"""
+        payload = {'content': 'Test Message'}
+        self.client.force_login(self.member)
+        res = self.client.post(self.message_create_url, payload)
+        message = Message.objects.filter(content=payload['content'])
+
+        self.assertEqual(res.status_code, 302)
+        self.assertTrue(message.exists())
+        self.assertEqual(message[0].bug, self.bug)
+        self.assertEqual(message[0].writer, self.member)
+        self.assertEqual(message[0].creationDate.date(), datetime.date.today())
+
+    def test_message_create_view_invalid_payload(self):
+        """Test the message create view correctly handles invalid payloads"""
+        self.client.force_login(self.member)
+
+        res = self.client.post(self.message_create_url)
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(Message.objects.exists())
+
+        res = self.client.post(self.message_create_url, {'content': ''})
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(Message.objects.exists())
