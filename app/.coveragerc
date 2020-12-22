@@ -1,0 +1,16 @@
+[run]
+source = .
+omit =
+	*apps.py
+	*migrations*
+	*manage.py
+	*wsgi.py
+	*asgi.py
+	*templates*
+	*staticfiles*
+	*/__pycache__/*
+	*/__init__.py
+	*/settings.py
+	*conftest.py
+	*/test/
+	*test_*
