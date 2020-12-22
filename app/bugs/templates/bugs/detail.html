@@ -9,7 +9,7 @@
 			<div class="d-md-flex align-items-center">
 				<h1 class="me-auto">{{ bug.title }}</h1>
 				
-				<div class="d-flex d-md-inline-block">
+				<div class="d-flex">
 					{% if bug.status in bug.ACTIVE_STATUS and request.user in bug.assigned_members.all %}
 						<form action="{% url 'bugs:change_working_status' bug.id %}" method="POST">
 							{% csrf_token %}

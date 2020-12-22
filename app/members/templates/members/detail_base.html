@@ -17,7 +17,7 @@
 				<h3 class="text-center text-primary">Assigned Bugs</h3>
 				
 				{% if member.assigned_bugs.all %}
-					{% include 'bugs/bug_list_group.html' with bugs=member.assigned_bugs show_projects=True %}
+					{% include 'bugs/bug_list_group.html' with bugs=member.assigned_bugs show_projects=True member=request.user %}
 				{% else %}
 					<p>{% block no_bug_message %}No bug assigned to this member.{% endblock %}</p>
 				{% endif %}
