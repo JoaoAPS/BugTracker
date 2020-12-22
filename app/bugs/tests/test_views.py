@@ -856,7 +856,7 @@ class TestMessageViews(TestCase):
         self.assertRedirects(
             res,
             reverse('members:login') +
-                f'?next=/bugs/{self.bug.id}/create_message'
+            f'?next=/bugs/{self.bug.id}/create_message'
         )
 
         self.client.force_login(self.non_member)
