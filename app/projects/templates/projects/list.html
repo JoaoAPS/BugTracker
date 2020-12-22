@@ -3,7 +3,7 @@
 {% block title %}Projects{% endblock %}
 
 {% block content %}
-	<div class="d-flex align-items-center">
+	<div class="d-md-flex align-items-center">
 		<h1 class="me-auto">Projects</h1>
 		
 		<a href="{% url 'projects:create' %}" class="btn btn-success me-2">Create Project</a>
@@ -51,10 +51,12 @@
 					
 					<div class="col-md">
 						{% with project.supervisors.all as all_sup %}
-							{% for supervisor in all_sup %}
-								{% if supervisor != all_sup|first %},{% endif %}
-								{{ supervisor.get_short_name }}
-							{% endfor %}
+							<span class="text-secondary text-md-dark">
+								{% for supervisor in all_sup %}
+									{% if supervisor != all_sup|first %},{% endif %}
+									{{ supervisor.get_short_name }}
+								{% endfor %}
+							</span>
 						{% endwith %}
 					</div>
 				</div>
