@@ -78,9 +78,9 @@ class Message(models.Model):
 
     def __str__(self):
         """Return the string representation of the message object"""
-        result = self.writer.get_short_name() + ' - ' + self.message
+        result = self.writer.get_short_name() + ' - ' + self.content
         if len(result) > 32:
-            result = result[:30] + '...'
+            result = result[:29] + '...'
 
         return result
 

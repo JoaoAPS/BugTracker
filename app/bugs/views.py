@@ -217,15 +217,11 @@ class MessageCreateView(IsInProjectMixin, View):
         if not content:
             raise SuspiciousOperation('Invalid message text!')
 
-        try:
-            content = str(content)
-        except (TypeError, ValueError):
-            raise SuspiciousOperation('Invalid message text!')
-        else:
-            Message.objects.create(
-                content=content,
-                writer=request.user,
-                bug=bug
-            )
+        content = str(content)
+        Message.objects.create(
+            content=content,
+            writer=request.user,
+            bug=bug
+        )
 
         return redirect('bugs:detail', pk=pk)

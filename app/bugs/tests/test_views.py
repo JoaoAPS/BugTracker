@@ -811,6 +811,12 @@ class TestBugChangeWorkingStatusView(TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
 
+        res = self.client.post(
+            self.change_working_status_url, {'starting': 'wrong'}
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(self.bug.status, self.bug.WAITING_STATUS)
+
 
 class TestMessageViews(TestCase):
     """Test the views involving bug messages"""

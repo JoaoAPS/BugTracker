@@ -1,6 +1,8 @@
 from django.test import TestCase
+from mixer.backend.django import mixer
 
 from projects.models import Project
+from bugs.models import Bug
 
 
 class ProjectModelTests(TestCase):
@@ -39,3 +41,20 @@ class ProjectModelTests(TestCase):
         actives = Project.get_active()
 
         self.assertQuerysetEqual(set(actives), {str(self.project)})
+
+    def test_project_active_bugs(self):
+        """Test the active_bugs project method"""
+        project = mixer.blend(Project)
+        b1 = mixer.blend(Bug, project=project, _status='WAITING')
+        b2 = mixer.blend(Bug, project=project, _status='BEING WORKED')
+        b3 = mixer.blend(Bug, project=project, _status='FIXED')
+        b4 = mixer.blend(Bug, project=project, _status='CLOSED')
+        active_bugs = project.active_bugs
+
+        self.assertIn(b1, active_bugs)
+        self.assertIn(b2, active_bugs)
+        self.assertNotIn(b3, active_bugs)
+        self.assertNotIn(b4, active_bugs)
+
+        p2 = Project.objects.create(title="Proj")
+        self.assertFalse(p2.active_bugs.exists())

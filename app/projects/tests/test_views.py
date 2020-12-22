@@ -485,6 +485,19 @@ def test_project_add_supervisor_view_successful(
     assert m1 in project.supervisors.all()
 
 
+def test_project_add_supervisor_view_must_be_project_member(
+    django_user_model, supervisor_client, project_add_supervisor_url, project
+):
+    """Test add_supervisor view only adds supervisor if is project member"""
+    non_project_member = mixer.blend(django_user_model)
+    res = supervisor_client.post(
+        project_add_supervisor_url, {'supervisor_ids': non_project_member.id}
+    )
+
+    assert res.status_code == 400
+    assert non_project_member not in project.supervisors.all()
+
+
 @pytest.mark.parametrize('payload', [
     {},
     {'supervisor_ids': 0},

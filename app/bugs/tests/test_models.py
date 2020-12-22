@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from mixer.backend.django import mixer
 
-from bugs.models import Bug
+from bugs.models import Bug, Message
 from projects.models import Project
 
 
@@ -67,3 +68,22 @@ class BugModelTests(TestCase):
         actives = Bug.get_active().order_by('title')
 
         self.assertQuerysetEqual(set(actives), [str(b1), str(b2)])
+
+
+class MessageModelTest(TestCase):
+    """Test the message model"""
+
+    def test_message_str_representation(self):
+        """Test the string representation of the message model"""
+        member = mixer.blend(get_user_model(), name="John Barnabara")
+        mes = mixer.blend(Message, writer=member, content="Short content")
+        assert str(mes) == member.get_short_name() + ' - ' + mes.content
+
+        mes = mixer.blend(
+            Message,
+            writer=member,
+            content="A very long string that would occupy too much space if \
+                we were to print it all as string"
+        )
+        assert len(str(mes)) == 32
+        assert str(mes)[-3:] == '...'
