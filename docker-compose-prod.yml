@@ -10,20 +10,30 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/dev/Dockerfile
+      dockerfile: ./docker/prod/Dockerfile
     depends_on:
       - db
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
-      DEBUG: 1
+      DEBUG: 0
       DJANGO_SECRET_KEY: czbwg1#bq#@t)vw#0l1q+7d1_+u6a55a%brs*e#@7bebu6gb@z
       DATABASE_DB: postgres_db
       DATABASE_USER: postgres_user
       DATABASE_PASSWORD: h8sahd1908998b8789h1
       DATABASE_HOST: db
+      ALLOWED_HOSTS: '.localhost,127.0.0.1,0.0.0.0'
     volumes:
-      - ./app:/app
-    command: sh -c '/wait-for db:5432 -- python manage.py migrate && 
-                                         python manage.py runserver 0.0.0.0:8000'
+      - staticfiles:/staticfiles
+    command: sh -c '/wait-for db:5432 -- gunicorn app.wsgi -b 0.0.0.0:8000'
+  nginx:
+    build: ./docker/prod/nginx/
+    ports:
+      - "8000:80"
+    depends_on:
+      - app
+    volumes:
+      - staticfiles:/staticfiles
 
+volumes:
+  staticfiles:
