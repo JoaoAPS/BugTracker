@@ -19,6 +19,6 @@ services:
       DATABASE_HOST: db
     volumes:
       - ./app:/app
-    command: sh -c '/wait-for db:5432 -- python manage.py migrate && 
+    command: sh -c '/wait-for db:5432 -- python manage.py migrate --noinput && 
                                          python manage.py runserver 0.0.0.0:8000'
 
