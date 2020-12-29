@@ -1,22 +1,11 @@
 import os
 from pathlib import Path
-# import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# env = environ.Env()
-# environ.Env.read_env()
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = env('DJANGO_SECRET_KEY')
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = bool(env('DEBUG'))
 DEBUG = bool(os.environ.get('DEBUG', False))
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS')

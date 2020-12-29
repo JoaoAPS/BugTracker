@@ -3,10 +3,8 @@ version: "3.8"
 services:
   db:
     image: postgres:13.1-alpine
-    environment:
-      - POSTGRES_DB=postgres_db
-      - POSTGRES_USER=postgres_user
-      - POSTGRES_PASSWORD=h8sahd1908998b8789h1
+    env_file:
+      - ./docker/prod/.db.env
   app:
     build:
       context: .
@@ -15,14 +13,10 @@ services:
       - db
     expose:
       - "8000"
+    env_file:
+      - ./docker/prod/.env
     environment:
-      DEBUG: 0
-      DJANGO_SECRET_KEY: czbwg1#bq#@t)vw#0l1q+7d1_+u6a55a%brs*e#@7bebu6gb@z
-      DATABASE_DB: postgres_db
-      DATABASE_USER: postgres_user
-      DATABASE_PASSWORD: h8sahd1908998b8789h1
       DATABASE_HOST: db
-      ALLOWED_HOSTS: '.localhost,127.0.0.1,0.0.0.0'
     volumes:
       - staticfiles:/staticfiles
     command: sh -c '/wait-for db:5432 -- gunicorn app.wsgi -b 0.0.0.0:8000'
