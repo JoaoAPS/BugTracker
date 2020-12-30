@@ -9,16 +9,20 @@ RUN apk add --no-cache postgresql-libs postgresql-client && \
 	python3 -m pip install -r /requirements.txt --no-cache-dir && \
 	apk --purge del .build-deps
 
-COPY wait-for /
-RUN chmod +x /wait-for
 
 RUN mkdir /app
 WORKDIR /app
 COPY app /app
 
-RUN mkdir /staticfiles
+RUN mkdir /files
+RUN mkdir /files/staticfiles
+COPY ./docker/prod/entrypoint.sh /files
+RUN chmod +x /files/entrypoint.sh
 
-RUN adduser -D user
-RUN chown -R user /app
-RUN chown user /wait-for
+COPY wait-for /files
+RUN chmod +x /files/wait-for
+
+RUN addgroup app && adduser -D user -G app
+RUN chown -R user:app /app
+RUN chown -R user:app /files
 USER user

@@ -9,6 +9,7 @@ services:
     build:
       context: .
       dockerfile: docker/dev/Dockerfile
+    container_name: app-dev
     depends_on:
       - db
     ports:

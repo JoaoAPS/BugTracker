@@ -18,8 +18,8 @@ services:
     environment:
       DATABASE_HOST: db
     volumes:
-      - staticfiles:/staticfiles
-    command: sh -c '/wait-for db:5432 -- gunicorn app.wsgi -b 0.0.0.0:8000'
+      - staticfiles:/files/staticfiles
+    command: sh -c '/files/wait-for db:5432 -- sh /files/entrypoint.sh'
   nginx:
     build: ./docker/prod/nginx/
     ports:

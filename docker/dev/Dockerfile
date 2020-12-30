@@ -19,8 +19,6 @@ RUN mkdir /app
 WORKDIR /app
 COPY app /app
 
-RUN mkdir /staticfiles
-
 
 # Create a non-root user to run the application
 RUN adduser -D user
