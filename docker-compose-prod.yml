@@ -5,6 +5,8 @@ services:
     image: postgres:13.1-alpine
     env_file:
       - ./docker/prod/.db.env
+    volumes:
+      - ./data/prod:/var/lib/postgresql/data/
   app:
     build:
       context: .
