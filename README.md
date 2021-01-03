@@ -25,7 +25,7 @@ An application that aids a team to keep track of bugs on the code of different p
 This will run the developer version.
 To run the production version, run `docker-compose -f docker-compose-prod.yml up`.
 Note that you first have to create a `.env` and `.db.env` files on `docker/prod/` with the enviroment variables.
-They are similar to those in `docker/prod/.env` and `docker/prod/.db.env`, but should also include a ALLOWED_HOSTS variable.
+They are similar to those in `docker/dev/.env` and `docker/dev/.db.env`, but should also include a ALLOWED_HOSTS variable.
 
 A default admin user is registered when the application is first built, use it to register other members.
 ```
