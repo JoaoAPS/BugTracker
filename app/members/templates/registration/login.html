@@ -1,16 +1,30 @@
 {% extends "core/base.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Member login{% endblock %}
 
 {% block content %}
 	<h1>Login</h1>	
 	
-	<form method="POST">
-		{% csrf_token %}
-		{{ form }}
-		
-		{{ form.errors }}
-		
-		<button class="btn btn-primary mt-2">Log in</button>
-	</form>
+	<div class="row">
+		<form method="POST" class="form col-md-8 mt-3 offset-md-1">
+			{% csrf_token %}
+			
+			{% for field in form %}
+				<div class="my-3">
+					{{ field.label }}
+					{% if field.errors %}
+						{{ field|add_class:"form-control is-invalid" }}
+						<div class="invalid-feedback">{{ field.errors }}</div>
+					{% else %}
+						{{ field|add_class:"form-control" }}
+					{% endif %}
+				</div>
+			{% endfor %}
+			
+			<span class="text-danger">{{ form.non_field_errors }}</span>
+			
+			<button class="btn btn-primary mt-2">Log in</button>
+		</form>
+	</div>
 {% endblock %}
