@@ -99,7 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = os.environ.get('TIMEZONE', 'America/Sao_Paulo')
 
 USE_I18N = True
 
