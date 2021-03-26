@@ -2,6 +2,20 @@
 
 An application that aids a team to keep track of bugs on the code of different projects.
 
+## Live demo
+
+A live version of this app is available on heroku: https://pure-hollows-99507.herokuapp.com
+
+You can login as a normal member with the credentials
+
+- Email: test@mail.com
+- Password: test123
+
+or as an admin to checkout the creation pages
+
+- Email: admin@mail.com
+- Password: admin
+
 ## Usage
 
 1. Register the members of your team.
